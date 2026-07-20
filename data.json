@@ -1,0 +1,74 @@
+{
+  "updated": "2026-07-17T11:06:26.385240+08:00",
+  "version": "1.0",
+  "platform": {
+    "agents_active": 7,
+    "agents_total": 12,
+    "last_policy_brief": "2026-07-16",
+    "next_policy_run": "weekday 08:00",
+    "next_ems_run": "Saturday 09:00",
+    "llm_gateway": "stopped",
+    "total_entries": 2
+  },
+  "market": {
+    "peak_valley_spread": 1.1577,
+    "peak_valley_unit": "元/kWh",
+    "peak_valley_change": "↑12% (from 1.1577)",
+    "storage_cost": 0.973,
+    "storage_cost_unit": "元/Wh",
+    "carbon_price": 78,
+    "carbon_price_unit": "元/吨",
+    "capacity_price_gd": 200,
+    "vpp_operators": 60,
+    "competitive_price": 0.488,
+    "competitive_price_unit": "元/kWh",
+    "competitive_price_change": "↑96% YoY"
+  },
+  "investment_scores": [
+    {
+      "region": "广东",
+      "type": "独立储能",
+      "capacity": "100MW/200MWh",
+      "score": 81,
+      "irr": "14%-18%",
+      "recommendation": "推荐开发",
+      "file": "data/investment-screenings/guangdong-storage-2026-07-16.md"
+    }
+  ],
+  "policies": [
+    {
+      "date": "2026-07-16",
+      "title": "十五五规划全面落地，储能年均增速17%；13省明确储能容量补偿机制；全国统一电力市场实施意见发布",
+      "category": "储能",
+      "impact": "high",
+      "region": "全国, 陕西"
+    }
+  ],
+  "alerts": [
+    {
+      "level": "red",
+      "title": "系统运行费17省暴涨",
+      "detail": "储能充电成本上升，需更新财务模型"
+    },
+    {
+      "level": "red",
+      "title": "浙江峰谷价差缩窄21%",
+      "detail": "存量项目IRR面临下调压力"
+    },
+    {
+      "level": "amber",
+      "title": "广东拟调整分时电价",
+      "detail": "中午新增低谷时段"
+    },
+    {
+      "level": "amber",
+      "title": "碳市场即将扩围",
+      "detail": "石化、化工行业纳入，碳价看涨"
+    },
+    {
+      "level": "amber",
+      "title": "绿证需求将刚性化",
+      "detail": "当前仅碳价8%，存在10倍上涨空间"
+    }
+  ]
+}

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EIAOS — EIAOS — PTM CEO Dashboard</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg-primary: #060d10;
+  --bg-card: #0c1519;
+  --bg-card-hover: #101b21;
+  --border: #16242e;
+  --text-primary: #e4ecef;
+  --text-secondary: #7f939e;
+  --text-dim: #4a5f6e;
+  --accent-blue: #0096e0;
+  --accent-green: #00d2aa;
+  --accent-amber: #e6a030;
+  --accent-red: #f04460;
+  --accent-purple: #8877ee;
+  --gradient-hero: linear-gradient(135deg, #060d10 0%, #0c1519 40%, #081114 100%);
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ─────────────────────────── */
+header {
+  background: var(--gradient-hero);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo {
+  width: 36px; height: 36px;
+  background: var(--accent-blue);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; color: #fff;
+}
+.header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+.header-sub { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+.header-right { display: flex; gap: 12px; align-items: center; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.status-text { font-size: 12px; color: var(--text-secondary); }
+.time-badge {
+  font-size: 11px; color: var(--text-dim);
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: var(--radius-sm);
+}
+
+/* ── Layout ─────────────────────────── */
+main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  padding: 24px 40px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+@media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+
+/* ── Cards ──────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
+.card-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(34,204,119,0.15); color: var(--accent-green); }
+
+/* ── Metrics Row ────────────────────── */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.metric-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.metric-value { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+.metric-change { font-size: 11px; margin-top: 4px; }
+.metric-change.up { color: var(--accent-green); }
+.metric-change.down { color: var(--accent-red); }
+.metric-change.neutral { color: var(--text-dim); }
+
+/* ── Agent Grid ─────────────────────── */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.agent-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  transition: all 0.2s;
+}
+.agent-card:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); }
+.agent-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.agent-desc { font-size: 11px; color: var(--text-dim); }
+.agent-status {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; margin-top: 8px; padding: 2px 8px;
+  border-radius: 10px;
+}
+.agent-status.active { background: rgba(34,204,119,0.12); color: var(--accent-green); }
+.agent-status.ondemand { background: rgba(51,153,255,0.12); color: var(--accent-blue); }
+
+/* ── Policy Feed ───────────────────── */
+.policy-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.policy-item:last-child { border-bottom: none; }
+.policy-impact {
+  width: 6px; height: 6px; border-radius: 50%;
+  margin-top: 6px; flex-shrink: 0;
+}
+.policy-impact.high { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
+.policy-impact.medium { background: var(--accent-amber); box-shadow: 0 0 6px var(--accent-amber); }
+.policy-date { font-size: 10px; color: var(--text-dim); }
+.policy-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.policy-cat { font-size: 10px; color: var(--text-dim); }
+
+/* ── Investment Table ──────────────── */
+.inv-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.inv-table th { text-align: left; color: var(--text-dim); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+.inv-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.inv-score { font-weight: 700; font-size: 16px; }
+.inv-score.good { color: var(--accent-green); }
+.inv-reco { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+.inv-reco.rec { background: rgba(34,204,119,0.12); color: var(--accent-green); }
+.inv-reco.caution { background: rgba(255,160,51,0.12); color: var(--accent-amber); }
+
+/* ── Market Panel ──────────────────── */
+.market-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.market-label { font-size: 11px; color: var(--text-dim); }
+.market-val { font-size: 14px; font-weight: 600; }
+.market-val.up { color: var(--accent-green); }
+.market-val.warn { color: var(--accent-amber); }
+
+/* ── Sidebar ───────────────────────── */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+.alert-item {
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 11px; display: flex; gap: 8px;
+}
+.alert-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.alert-dot.red { background: var(--accent-red); }
+.alert-dot.amber { background: var(--accent-amber); }
+
+/* ── Quick Actions ─────────────────── */
+.quick-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.quick-btn {
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--text-secondary); font-size: 12px; cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-btn:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); color: var(--text-primary); }
+
+/* ── Section spacing ───────────────── */
+.section { margin-bottom: 20px; }
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
+
+/* ── Tab switcher ──────────────────── */
+.tabs { display: flex; gap: 2px; margin-bottom: 16px; }
+.tab {
+  padding: 6px 14px; font-size: 11px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+}
+.tab.active { background: var(--bg-card); border-color: var(--border); color: var(--text-primary); }
+.tab:hover { color: var(--text-primary); }
+
+/* ── Knowledge Search ──────────────── */
+.search-bar {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.search-input {
+  flex: 1; padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-primary);
+  color: var(--text-primary); font-size: 12px; outline: none;
+}
+.search-input:focus { border-color: var(--accent-blue); }
+.search-btn {
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: none; background: var(--accent-blue); color: #fff;
+  font-size: 12px; cursor: pointer; font-weight: 500;
+}
+.search-results { font-size: 11px; max-height: 200px; overflow-y: auto; }
+.search-result { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+/* ── Footer ────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 40px; font-size: 11px; color: var(--text-dim);
+  display: flex; justify-content: space-between;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="data:image/png;base64,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" class="logo" alt="PTM" style="width:36px;height:36px;border-radius:50%">
+    <div>
+      <div class="header-title">EIAOS</div>
+      <div class="header-sub">Energy Investment AI Operating System</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span class="status-text">全部 Agent 运行中</span>
+    <span class="time-badge">2026-07-16 18:30 CST</span>
+  </div>
+</header>
+
+<main>
+  <!-- ===== LEFT COLUMN ===== -->
+  <div>
+
+    <!-- Metrics Row -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Active Agents</div>
+        <div class="metric-value" style="color:var(--accent-blue)">7</div>
+        <div class="metric-change up">↑ 4 this week</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Investment Score</div>
+        <div class="metric-value" style="color:var(--accent-green)">81</div>
+        <div class="metric-change up">Guangdong Storage</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Market Signal</div>
+        <div class="metric-value" style="color:var(--accent-amber)">1.2968</div>
+        <div class="metric-change up">GD Peak-Valley ↑12%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Policy Alerts</div>
+        <div class="metric-value" style="color:var(--accent-red)">5</div>
+        <div class="metric-change neutral">High Impact · Today</div>
+      </div>
+    </div>
+
+    <!-- Agent Grid -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">AI Agent 体系</span>
+        <span class="card-badge">7 active</span>
+      </div>
+      <div class="agent-grid">
+        <div class="agent-card">
+          <div class="agent-name">📡 Policy Monitor</div>
+          <div class="agent-desc">每日政策扫描 · 工作日 8:00</div>
+          <span class="agent-status active">● 运行中</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-name">💰 Investment Screening</div>
+          <div class="agent-desc">项目可开发评分 · 五维度</div>
+          <span class="agent-status ondemand">● 按需调用</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-name">📊 Financial Model</div>
+          <div class="agent-desc">IRR/NPV/DSCR · 敏感性分析</div>
+          <span class="agent-status ondemand">● 按需调用</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-name">🔋 EMS Report</div>
+          <div class="agent-desc">光伏站/储能站 · 周六 9:00</div>
+          <span class="agent-status active">● 运行中</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-name">🗺️ GIS Site Selection</div>
+          <div class="agent-desc">选址评估 · 变电站/土地/负荷</div>
+          <span class="agent-status ondemand">● 按需调用</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-name">📈 Power Market</div>
+          <div class="agent-desc">电价跟踪 · 交易建议</div>
+          <span class="agent-status ondemand">● 按需调用</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-name">🧠 Knowledge Base</div>
+          <div class="agent-desc">13政策+4区域+9电价数据</div>
+          <span class="agent-status active">● 就绪</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest Policy Briefs -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">最新政策简报 · 2026-07-16</span>
+        <span class="card-badge">5 High Impact</span>
+      </div>
+      <div class="card">
+        <div class="tabs" id="policyTabs">
+          <button class="tab active" onclick="filterPolicies('all')">全部</button>
+          <button class="tab" onclick="filterPolicies('储能')">储能</button>
+          <button class="tab" onclick="filterPolicies('电力市场')">电力市场</button>
+          <button class="tab" onclick="filterPolicies('VPP/微电网')">VPP</button>
+          <button class="tab" onclick="filterPolicies('氢能')">氢能</button>
+          <button class="tab" onclick="filterPolicies('绿证/碳交易')">碳交易</button>
+        </div>
+
+        <div id="policyList">
+        <div class="policy-item" data-cat="储能">
+          <span class="policy-impact high"></span>
+          <div>
+            <div class="policy-date">2026-07-07 · 陕西/青海</div>
+            <div class="policy-title">13省明确新型储能容量补偿机制，陕西165元、青海185元/KW/年</div>
+            <div class="policy-cat">⚡ 储能 · 容量电价</div>
+          </div>
+        </div>
+        <div class="policy-item" data-cat="储能">
+          <span class="policy-impact high"></span>
+          <div>
+            <div class="policy-date">2026-06-25 · 全国</div>
+            <div class="policy-title">十五五规划：储能年均增速17%，储能/风光装机比目标10.7%</div>
+            <div class="policy-cat">⚡ 储能 · 十五五</div>
+          </div>
+        </div>
+        <div class="policy-item" data-cat="电力市场">
+          <span class="policy-impact high"></span>
+          <div>
+            <div class="policy-date">2026-02-08 · 全国</div>
+            <div class="policy-title">国办发〔2026〕4号：2030年前现货市场全面运行，储能获"可靠容量"身份</div>
+            <div class="policy-cat">🏭 电力市场 · 统一市场</div>
+          </div>
+        </div>
+        <div class="policy-item" data-cat="VPP/微电网">
+          <span class="policy-impact high"></span>
+          <div>
+            <div class="policy-date">2026-05-14 · 广东韶关</div>
+            <div class="policy-title">首单"算随电动"落地广东，VPP聚合数据中心参与电力现货</div>
+            <div class="policy-cat">🌐 VPP · 算电协同</div>
+          </div>
+        </div>
+        <div class="policy-item" data-cat="绿证/碳交易">
+          <span class="policy-impact high"></span>
+          <div>
+            <div class="policy-date">2026-04-23 · 全国</div>
+            <div class="policy-title">双碳"5+9"考核体系：5项指标一票否决，与领导选拔挂钩</div>
+            <div class="policy-cat">💰 碳交易 · 刚性考核</div>
+          </div>
+        </div>
+        <div class="policy-item" data-cat="氢能">
+          <span class="policy-impact medium"></span>
+          <div>
+            <div class="policy-date">2026-06-25 · 全国</div>
+            <div class="policy-title">十五五规划首次量化：2030年绿氢规模200万吨</div>
+            <div class="policy-cat">🔋 氢能 · 绿氢目标</div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Investment Screenings -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">投资筛选结果</span>
+        <span class="card-badge">2 projects</span>
+      </div>
+      <div class="card">
+        <table class="inv-table">
+          <thead>
+            <tr><th>区域</th><th>项目类型</th><th>容量</th><th>评分</th><th>预估IRR</th><th>建议</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>广东</td>
+              <td>独立储能</td>
+              <td>100MW/200MWh</td>
+              <td class="inv-score good">81</td>
+              <td>14%–18%</td>
+              <td><span class="inv-reco rec">推荐开发</span></td>
+            </tr>
+            <tr>
+              <td>广东·韶关</td>
+              <td>独立储能</td>
+              <td>100MW/200MWh</td>
+              <td class="inv-score good">82</td>
+              <td>14%–18%</td>
+              <td><span class="inv-reco rec">推荐可研</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Market Data -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">电力市场实时数据</span>
+        <span class="card-badge">广东 · 2026-07</span>
+      </div>
+      <div class="card">
+        <div class="market-row">
+          <span class="market-label">珠三角峰谷价差</span>
+          <span class="market-val up">1.2968 元/kWh ↑12%</span>
+        </div>
+        <div class="market-row">
+          <span class="market-label">集中竞价电价</span>
+          <span class="market-val up">0.488 元/kWh ↑96% YoY</span>
+        </div>
+        <div class="market-row">
+          <span class="market-label">储能系统成本</span>
+          <span class="market-val" style="color:var(--accent-green)">0.973 元/Wh 历史低位</span>
+        </div>
+        <div class="market-row">
+          <span class="market-label">广东容量电价</span>
+          <span class="market-val">~200 元/KW/年</span>
+        </div>
+        <div class="market-row">
+          <span class="market-label">全国碳价</span>
+          <span class="market-val up">78 元/吨 (3月均价)</span>
+        </div>
+        <div class="market-row">
+          <span class="market-label">VPP运营商</span>
+          <span class="market-val up">60 家 (广东)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section">
+      <div class="section-header"><span class="section-title">快速操作</span></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="alert('在 Cowork 中对我说：调用 Investment Screening Agent，评估【省份+项目类型】')">🔍 评估新项目</button>
+        <button class="quick-btn" onclick="alert('在 Cowork 中对我说：调用 Financial Model Agent，计算【项目参数】的财务模型')">💰 财务测算</button>
+        <button class="quick-btn" onclick="alert('在 Cowork 中对我说：调用 GIS Site Selection Agent，评估【区域】的储能选址')">🗺️ 选址评估</button>
+        <button class="quick-btn" onclick="alert('在 Cowork 中对我说：生成今日本日政策简报')">📡 刷新政策</button>
+        <button class="quick-btn" onclick="window.open('data/policy-briefs/2026/07/2026-07-16.md', '_blank')">📄 查看详细简报</button>
+        <button class="quick-btn" onclick="window.open('data/ems-reports/power-market-weekly-2026-07-16.md','_blank')">📈 市场周报</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT SIDEBAR ===== -->
+  <div class="sidebar">
+    <!-- Alerts -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚠ 待关注事项</span>
+        <span class="card-badge">5</span>
+      </div>
+      <div class="alert-item">
+        <span class="alert-dot red"></span>
+        <div>
+          <div style="font-weight:500">系统运行费17省暴涨</div>
+          <div style="color:var(--text-dim);font-size:10px">储能充电成本上升，需更新财务模型</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-dot red"></span>
+        <div>
+          <div style="font-weight:500">浙江峰谷价差缩窄21%</div>
+          <div style="color:var(--text-dim);font-size:10px">存量项目IRR面临下调压力</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-dot amber"></span>
+        <div>
+          <div style="font-weight:500">广东拟调整分时电价</div>
+          <div style="color:var(--text-dim);font-size:10px">中午新增低谷时段，影响充放策略</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-dot amber"></span>
+        <div>
+          <div style="font-weight:500">碳市场即将扩容</div>
+          <div style="color:var(--text-dim);font-size:10px">石化、化工行业纳入，碳价看涨</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-dot amber"></span>
+        <div>
+          <div style="font-weight:500">绿证需求将刚性化</div>
+          <div style="color:var(--text-dim);font-size:10px">当前仅碳价8%，存在10倍上涨空间</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Knowledge Search -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🔎 知识库搜索</span>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" id="searchInput" placeholder="搜索政策、电价、区域…" onkeyup="handleSearch(event)">
+        <button class="search-btn" onclick="doSearch()">搜索</button>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div style="color:var(--text-dim);font-size:11px">输入关键词搜索知识库（13条政策 + 4区域 + 9条电价）</div>
+      </div>
+    </div>
+
+    <!-- Two-Sentence Summary -->
+    <div class="card" style="border-left: 3px solid var(--accent-blue)">
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">📋 CEO 要点速览</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text-secondary)">
+        广东储能投资窗口最佳：峰谷价差1.30元创纪录，系统成本0.973元为历史低位。<br><br>
+        双碳刚性考核（5+9体系）+ 碳市场扩围 + 绿证刚性化 —— 三重政策驱动力已形成。
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>EIAOS v0.2 · PTM © 2026</span>
+  <span>Policy Monitor 下次运行: 2026-07-17 08:00 · EMS Report 下次运行: 2026-07-18 09:00</span>
+</footer>
+
+<script>
+function filterPolicies(cat) {
+  document.querySelectorAll('#policyTabs .tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('#policyList .policy-item').forEach(el => {
+    if (cat === 'all') { el.style.display = 'flex'; }
+    else { el.style.display = el.dataset.cat === cat ? 'flex' : 'none'; }
+  });
+}
+
+const KB = {
+  policies: [
+    { title: "十五五新型能源体系规划", cat: "储能", date: "2026-06-25", summary: "储能年均增速17%，储能/风光装机比目标10.7%" },
+    { title: "国办发〔2026〕4号 统一电力市场实施意见", cat: "电力市场", date: "2026-02-08", summary: "2030年前现货市场全面正式运行" },
+    { title: "114号文 发电侧容量电价机制", cat: "储能", date: "2026-01-30", summary: "首次明确新型储能容量电价机制" },
+    { title: "陕西独立储能容量电价165元/KW/年", cat: "储能", date: "2026-07-07", summary: "8月1日实施，按放电时长折算" },
+    { title: "青海发电侧可靠容量补偿185元/KW/年", cat: "储能", date: "2026-07-07", summary: "容量供需系数0.92" },
+    { title: "广东省新型储能电站建设运行管理办法", cat: "储能", date: "2026-04-22", summary: "首部储能全生命周期管理规章" },
+    { title: "VPP国标 GB/T 47241-2026", cat: "VPP/微电网", date: "2026-07", summary: "虚拟电厂建设迈入标准化" },
+    { title: "碳达峰碳中和综合评价考核办法", cat: "绿证/碳交易", date: "2026-04-23", summary: "5+9指标体系一票否决" },
+    { title: "2030年绿氢规模200万吨", cat: "氢能", date: "2026-06-25", summary: "十五五首次量化氢能目标" },
+    { title: "广东首单算随电动VPP交易", cat: "VPP/微电网", date: "2026-05-14", summary: "数据中心以VPP形式参与现货" },
+    { title: "AI与能源双向赋能行动方案", cat: "VPP/微电网", date: "2026-05", summary: "算电协同写入国家政策" },
+    { title: "广东独立储能及VPP正式入市", cat: "电力市场", date: "2026-06", summary: "进入广东电力中长期市场" },
+    { title: "氢能综合应用试点通知", cat: "氢能", date: "2026-07", summary: "化工冶金交通储能四场景试点" }
+  ],
+  prices: [
+    { region: "广东珠三角", metric: "最大峰谷价差", value: "1.1577 元/kWh", date: "2026-01" },
+    { region: "广东", metric: "储能系统成本", value: "0.973 元/Wh", date: "2026-04" },
+    { region: "广东", metric: "碳价", value: "78 元/吨", date: "2026-03" },
+    { region: "广东", metric: "容量电价", value: "200 元/KW/年", date: "2026" },
+    { region: "广东", metric: "最新峰谷价差", value: "1.2968 元/kWh", date: "2026-07" }
+  ],
+  regions: [
+    { province: "广东", peakValley: 1.1577, capacityPrice: 200, vpp: 60, loadGap: "5-10GW" },
+    { province: "陕西", capacityPrice: 165, effective: "2026-08-01" },
+    { province: "青海", capacityPrice: 185, factor: 0.92 },
+    { province: "浙江", peakValley: 0.7867, note: "峰谷差缩窄21%" }
+  ]
+};
+
+function handleSearch(e) { if (e.key === 'Enter') doSearch(); }
+function doSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const r = document.getElementById('searchResults');
+  if (!q) { r.innerHTML = '<div style="color:var(--text-dim);font-size:11px">输入关键词搜索</div>'; return; }
+  let html = '';
+  for (const p of KB.policies) {
+    if (p.title.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q)) {
+      html += `<div class="search-result"><strong>[政策]</strong> ${p.title} <span style="color:var(--text-dim)">${p.date}</span></div>`;
+    }
+  }
+  for (const p of KB.prices) {
+    if (p.region.toLowerCase().includes(q) || p.metric.toLowerCase().includes(q)) {
+      html += `<div class="search-result"><strong>[电价]</strong> ${p.region} ${p.metric}: ${p.value} <span style="color:var(--text-dim)">${p.date}</span></div>`;
+    }
+  }
+  for (const p of KB.regions) {
+    if (p.province.toLowerCase().includes(q)) {
+      html += `<div class="search-result"><strong>[区域]</strong> ${p.province}: 峰谷价差=${p.peakValley||'?'} 容量电价=${p.capacityPrice||'?'}</div>`;
+    }
+  }
+  r.innerHTML = html || '<div style="color:var(--text-dim);font-size:11px">无匹配结果</div>';
+}
+
+// Update time
+setInterval(() => {
+  const now = new Date();
+  document.querySelector('.time-badge').textContent = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' CST';
+}, 60000);
+</script>
+</body>
+</html>
