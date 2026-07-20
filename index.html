@@ -2,97 +2,1035 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>PTM — AI Agent Platform</title>
-<script src="agents.js"></script>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PTM — AI-Powered Renewable Asset Intelligence</title>
 <style>
-:root { --bg:#060d10; --bg-card:#101b21; --border:#16242e; --text:#e4ecef; --muted:#7f939e; --teal:#00d2aa; --blue:#0096e0; }
-body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,sans-serif; margin:0; padding:40px; }
-h1 { text-align:center; font-size:36px; margin-bottom:40px; }
-h1 span { color:var(--teal); }
-.agent-card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:24px; margin-bottom:20px; max-width:800px; margin-left:auto; margin-right:auto; }
-.agent-card h3 { margin-bottom:8px; }
-.agent-card p { color:var(--muted); font-size:14px; margin-bottom:16px; }
-.inputs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-.inputs input, .inputs textarea { background:#0c1519; border:1px solid var(--border); border-radius:6px; padding:10px; color:var(--text); font-size:14px; }
-.inputs textarea { grid-column:1/-1; min-height:60px; }
-button { background:linear-gradient(135deg,var(--teal),var(--blue)); color:white; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; }
-button:disabled { opacity:0.5; }
-.result { display:none; margin-top:16px; padding:16px; background:#0c1519; border-left:3px solid var(--teal); white-space:pre-wrap; font-size:14px; line-height:1.6; }
+:root {
+  --bg: #060d10;
+  --bg-elevated: #0c1519;
+  --bg-card: #101b21;
+  --border: #16242e;
+  --border-glow: rgba(0, 210, 170, 0.25);
+  --text: #e4ecef;
+  --text-muted: #7f939e;
+  --text-dim: #4a5f6e;
+  --logo-teal: #00d2aa;
+  --logo-blue: #0096e0;
+  --teal: #00d2aa;
+  --teal-glow: rgba(0, 210, 170, 0.35);
+  --blue: #0096e0;
+  --blue-glow: rgba(0, 150, 224, 0.35);
+  --green: #00d2aa;
+  --green-glow: rgba(0, 210, 170, 0.3);
+  --amber: #e6a030;
+  --red: #f04460;
+  --radius: 8px;
+  --max-w: 1280px;
+    /* IE11 flexbox fix */
+    .nav-inner { display: -ms-flexbox; display: flex; }
+    .nav-links { display: -ms-flexbox; display: flex; }
+    .hero-grid { display: -ms-grid; display: grid; -ms-grid-columns: 1.1fr 0.9fr; }
+    .caps { display: -ms-grid; display: grid; -ms-grid-columns: 1fr 1fr 1fr 1fr; }
+    .solutions { display: -ms-grid; display: grid; -ms-grid-columns: 1fr 1fr 1fr; }
+    .data-grid { display: -ms-grid; display: grid; -ms-grid-columns: 1fr 1fr 1fr 1fr; }
+  }
+
+  /* IE fallback: force hamburger on narrow screens */
+  @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .nav-links { display: none; }
+    .menu-toggle { display: block; }
+  }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", system-ui, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── SVG LOGO ───────────────────────── */
+.logo-svg { width: 36px; height: 36px; flex-shrink: 0; }
+.logo-svg-lg { width: 48px; height: 48px; flex-shrink: 0; }
+
+/* ─── NAV ───────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(6,13,16,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,210,170,0.08);
+  padding: 0 32px; transition: all 0.3s;
+}
+.nav-inner {
+  max-width: var(--max-w); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
+  color: var(--text); text-decoration: none;
+}
+.nav-brand-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; letter-spacing: 1px; text-transform: uppercase; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a {
+  font-size: 13px; color: var(--text-muted); text-decoration: none;
+  letter-spacing: 0.3px; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--logo-teal); }
+.nav-cta {
+  padding: 7px 18px; border-radius: 20px;
+  background: rgba(0,210,170,0.08); border: 1px solid rgba(0,210,170,0.25);
+  color: var(--logo-teal); font-size: 12px; text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-cta:hover { background: var(--logo-teal); border-color: var(--logo-teal); color: #021012; }
+
+/* ─── SECTION ───────────────────────── */
+section { padding: 100px 32px; position: relative; }
+.section-inner { max-width: var(--max-w); margin: 0 auto; }
+
+/* ─── HERO ──────────────────────────── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; padding-top: 80px;
+  background: radial-gradient(ellipse 80% 60% at 15% 20%, rgba(0,210,170,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse 50% 50% at 85% 65%, rgba(0,150,224,0.06) 0%, transparent 50%);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; top: 0; right: 0; width: 50vw; height: 100vh;
+  background: radial-gradient(circle at 70% 40%, rgba(0,210,170,0.03), transparent 70%);
+  pointer-events: none;
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center;
+  position: relative; z-index: 1;
+}
+.hero-eyebrow {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+  color: var(--logo-teal); margin-bottom: 20px; font-weight: 600;
+}
+.hero h1 { font-size: 54px; line-height: 1.1; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 24px; }
+.hero-hl { background: linear-gradient(135deg, var(--logo-teal), var(--logo-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { font-size: 17px; color: var(--text-muted); max-width: 480px; margin-bottom: 36px; line-height: 1.7; }
+.hero-btns { display: flex; gap: 12px; }
+.btn {
+  padding: 12px 28px; border-radius: 24px; font-size: 14px; font-weight: 600;
+  text-decoration: none; transition: all 0.25s;
+}
+.btn-primary { background: linear-gradient(135deg, var(--logo-teal), var(--logo-blue)); color: #021012; box-shadow: 0 4px 28px var(--teal-glow); }
+.btn-primary:hover { box-shadow: 0 6px 36px rgba(0,210,170,0.45); transform: translateY(-1px); }
+.btn-ghost { background: transparent; border: 1px solid rgba(0,210,170,0.3); color: var(--text-muted); }
+.btn-ghost:hover { border-color: var(--logo-teal); color: var(--logo-teal); }
+
+.hero-visual {
+  background: var(--bg-card); border: 1px solid rgba(0,210,170,0.12);
+  border-radius: 16px; padding: 24px; position: relative;
+  box-shadow: 0 0 80px rgba(0,210,170,0.04);
+}
+.hero-visual .metric-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.hv-metric {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px;
+}
+.hv-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.hv-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-top: 4px; }
+.hv-value.teal { color: var(--logo-teal); }
+.hv-value.blue { color: var(--logo-blue); }
+.hv-value.amber { color: var(--amber); }
+.hv-change { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.hero-visual .pulse-line {
+  height: 2px; background: linear-gradient(90deg, var(--logo-teal), var(--logo-blue), var(--logo-teal));
+  border-radius: 1px; margin: 16px 0; opacity: 0.6;
+  animation: pulseLine 2s ease-in-out infinite;
+}
+@keyframes pulseLine { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+.hero-visual .info-row { display: flex; justify-content: space-between; font-size: 11px; }
+.hero-visual .info-row span { color: var(--text-muted); }
+.hero-visual .info-row .active { color: var(--logo-teal); }
+
+/* ─── SECTION HEADERS ───────────────── */
+.section-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 3px;
+  color: var(--logo-teal); margin-bottom: 12px; font-weight: 600;
+}
+.section-title {
+  font-size: 36px; font-weight: 700; letter-spacing: -1px;
+  margin-bottom: 16px; line-height: 1.2;
+}
+.section-subtitle { font-size: 15px; color: var(--text-muted); max-width: 540px; margin-bottom: 48px; line-height: 1.6; }
+
+/* ─── EIAOS INTRO ──────────────────── */
+.eiaos-bg {
+  background: linear-gradient(180deg, rgba(0,150,224,0.02) 0%, var(--bg) 30%, var(--bg) 70%, rgba(0,210,170,0.02) 100%);
+  border-top: 1px solid rgba(0,210,170,0.08); border-bottom: 1px solid rgba(0,210,170,0.08);
+}
+.eiaos-diagram {
+  display: grid; grid-template-rows: auto auto auto;
+  gap: 8px; max-width: 680px; margin: 0 auto;
+}
+.eiaos-tier {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 18px 24px; border-radius: var(--radius);
+  border: 1px solid var(--border); position: relative;
+}
+.eiaos-tier.top {
+  background: linear-gradient(135deg, rgba(0,210,170,0.08), rgba(0,150,224,0.08));
+  border-color: rgba(0,210,170,0.3); font-size: 18px; font-weight: 700; margin-bottom: 4px;
+}
+.eiaos-tier.mid {
+  background: var(--bg-card); display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; padding: 16px;
+}
+.eiaos-tier.bottom {
+  background: var(--bg);
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 8px; padding: 14px; font-size: 10px; color: var(--text-dim);
+  text-align: center;
+}
+.eiaos-agent {
+  padding: 10px 12px; border-radius: 6px;
+  background: var(--bg); border: 1px solid var(--border);
+  font-size: 11px; color: var(--text-muted); text-align: center;
+  transition: all 0.2s;
+}
+.eiaos-agent:hover { border-color: var(--logo-teal); color: var(--text); }
+.eiaos-connector {
+  width: 2px; height: 16px;
+  background: linear-gradient(180deg, var(--logo-teal), var(--logo-blue));
+  margin: 0 auto; opacity: 0.5;
+}
+
+/* ─── CAPABILITIES ─────────────────── */
+.caps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.cap-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 24px;
+  transition: all 0.3s;
+}
+.cap-card:nth-child(1):hover { border-color: rgba(0,210,170,0.4); }
+.cap-card:nth-child(2):hover { border-color: rgba(0,150,224,0.4); }
+.cap-card:nth-child(3):hover { border-color: rgba(0,210,170,0.4); }
+.cap-card:nth-child(4):hover { border-color: rgba(0,150,224,0.4); }
+.cap-icon { font-size: 28px; margin-bottom: 16px; }
+.cap-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.cap-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+.cap-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.cap-tag {
+  font-size: 10px; padding: 3px 10px; border-radius: 10px;
+  background: rgba(0,210,170,0.06); color: var(--text-dim);
+}
+
+/* ─── VERIFIED DATA ────────────────── */
+.data-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.data-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; text-align: center;
+  transition: all 0.3s;
+}
+.data-card:nth-child(odd):hover { border-color: rgba(0,210,170,0.3); }
+.data-card:nth-child(even):hover { border-color: rgba(0,150,224,0.3); }
+.data-value { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 6px; }
+.data-value.teal { color: var(--logo-teal); }
+.data-value.blue { color: var(--logo-blue); }
+.data-label { font-size: 12px; color: var(--text-dim); }
+.data-sub { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+/* ─── AGENT GRID ───────────────────── */
+.agent-section {
+  background: linear-gradient(180deg, rgba(0,210,170,0.02), transparent 40%, transparent 60%, rgba(0,150,224,0.02));
+  border-top: 1px solid rgba(0,210,170,0.08); border-bottom: 1px solid rgba(0,210,170,0.08);
+}
+.agent-flex {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  max-width: 900px; margin: 0 auto;
+}
+.agent-node {
+  padding: 10px 18px; border-radius: 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted); cursor: default;
+  transition: all 0.25s;
+}
+.agent-node:nth-child(odd):hover {
+  border-color: var(--logo-teal); color: var(--text);
+  box-shadow: 0 0 18px var(--teal-glow); transform: scale(1.03);
+}
+.agent-node:nth-child(even):hover {
+  border-color: var(--logo-blue); color: var(--text);
+  box-shadow: 0 0 18px var(--blue-glow); transform: scale(1.03);
+}
+.agent-node.core {
+  background: linear-gradient(135deg, rgba(0,210,170,0.15), rgba(0,150,224,0.15));
+  border-color: rgba(0,210,170,0.4);
+  color: var(--logo-teal); font-weight: 600;
+}
+
+/* ─── SOLUTIONS ────────────────────── */
+.solutions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.sol-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 24px;
+  transition: all 0.3s;
+}
+.sol-card:hover { border-color: rgba(0,210,170,0.25); }
+.sol-icon { font-size: 32px; margin-bottom: 14px; }
+.sol-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.sol-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+
+/* ─── INSIGHTS ─────────────────────── */
+.insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.insight-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: all 0.3s;
+}
+.insight-card:hover { border-color: rgba(0,150,224,0.25); }
+.insight-body { padding: 24px; }
+.insight-date { font-size: 10px; color: var(--text-dim); margin-bottom: 8px; }
+.insight-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+.insight-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.insight-tag {
+  display: inline-block; font-size: 10px; padding: 2px 10px; border-radius: 10px;
+  background: rgba(0,210,170,0.12); color: var(--logo-teal); margin-top: 12px;
+}
+
+/* ─── CTA ──────────────────────────── */
+.cta-section {
+  text-align: center; padding: 120px 32px;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(0,210,170,0.06) 0%, transparent 60%);
+}
+.cta-section h2 { font-size: 42px; font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; }
+.cta-section h2 span { background: linear-gradient(135deg, var(--logo-teal), var(--logo-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.cta-section p { font-size: 16px; color: var(--text-muted); margin-bottom: 32px; }
+.cta-btns { display: flex; gap: 12px; justify-content: center; }
+
+/* ─── FOOTER ────────────────────────── */
+footer {
+  border-top: 1px solid rgba(0,210,170,0.08); padding: 48px 32px 32px;
+  background: var(--bg-elevated);
+}
+.footer-inner { max-width: var(--max-w); margin: 0 auto; }
+.footer-top {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+  margin-bottom: 40px;
+}
+.footer-brand { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+.footer-sub { font-size: 12px; color: var(--text-dim); max-width: 240px; line-height: 1.6; }
+.footer-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.footer-col-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 16px; }
+.footer-col a {
+  display: block; font-size: 12px; color: var(--text-muted); text-decoration: none;
+  margin-bottom: 8px; transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--logo-teal); }
+.footer-bottom {
+  border-top: 1px solid var(--border); padding-top: 20px;
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text-dim);
+}
+
+/* ─── MOBILE NAV ───────────────────── */
+.menu-toggle {
+  display: none; background: none; border: none;
+  cursor: pointer; padding: 8px; flex-shrink: 0;
+}
+.menu-toggle span {
+  display: block; width: 22px; height: 2px;
+  background: var(--text-muted); margin: 5px 0;
+  transition: all 0.3s; border-radius: 1px;
+}
+.menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+.menu-toggle.open span:nth-child(2) { opacity: 0; }
+.menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+
+/* ─── LARGE SCREEN CEILING ─────────── */
+@media (min-width: 1600px) {
+  .section-inner { max-width: 1440px; }
+  .hero h1 { font-size: 64px; }
+  .hero p { font-size: 18px; }
+  section { padding: 120px 64px; }
+  .hero { min-height: 100vh; }
+}
+
+/* 16:9 landscape & WQHD 2560×1440 */
+@media (min-width: 2000px) {
+  .section-inner { max-width: 1600px; }
+  .hero h1 { font-size: 72px; }
+  .hero p { font-size: 20px; }
+  section { padding: 140px 80px; }
+  .hero-grid { gap: 100px; }
+  .caps { gap: 24px; }
+  .solutions { gap: 24px; }
+  .data-grid { gap: 24px; }
+}
+
+/* Tablet landscape & small laptop */
+@media (max-width: 1200px) {
+  section { padding: 80px 24px; }
+  .hero h1 { font-size: 44px; }
+  .hero-grid { gap: 40px; }
+  .caps { gap: 12px; }
+  .solutions { gap: 12px; }
+  .footer-top { gap: 24px; }
+}
+
+/* iPad Pro 1024px portrait */
+@media (max-width: 1024px) {
+  .hero h1 { font-size: 38px; }
+  .caps { grid-template-columns: repeat(2, 1fr); }
+  .solutions { grid-template-columns: repeat(2, 1fr); }
+  .insights { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 860px) {
+.menu-toggle { display: block; }
+  .nav-links {
+    display: none; position: fixed; top: 56px; left: 0; right: 0;
+    background: rgba(6,13,16,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    flex-direction: column; gap: 0; padding: 16px 32px;
+    border-bottom: 1px solid rgba(0,210,170,0.12);
+    z-index: 999;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a {
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+    font-size: 15px;
+  }
+  .nav-links a:last-child { border-bottom: none; }
+  .nav-cta { display: none; }
+  section { padding: 60px 20px; }
+  .hero { min-height: auto; padding-top: 100px; padding-bottom: 60px; }
+  .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+  .hero h1 { font-size: 36px; letter-spacing: -1px; }
+  .hero p { font-size: 15px; max-width: 100%; }
+  .hero-visual { max-width: 100%; margin-top: 16px; }
+  .hero-btns { flex-direction: column; }
+  .btn { text-align: center; }
+  .section-title { font-size: 28px; }
+  .section-subtitle { font-size: 14px; }
+  .caps { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .solutions { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .data-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .insights { grid-template-columns: 1fr; }
+  .eiaos-tier.mid { grid-template-columns: repeat(2, 1fr); font-size: 10px; }
+  .eiaos-tier.bottom { grid-template-columns: repeat(3, 1fr); font-size: 9px; }
+  .footer-top { grid-template-columns: 1fr 1fr; row-gap: 32px; }
+  .cta-section h2 { font-size: 28px; }
+  .data-value { font-size: 28px; }
+}
+
+
+/* Phone */
+@media (max-width: 640px) {
+  nav { padding: 0 16px; }
+  section { padding: 48px 16px; }
+  .hero { padding-top: 96px; padding-bottom: 48px; }
+  .hero h1 { font-size: 28px; letter-spacing: -0.5px; }
+  .hero p { font-size: 14px; margin-bottom: 24px; }
+  .hero-eyebrow { font-size: 10px; letter-spacing: 2px; margin-bottom: 12px; }
+  .hero-visual { padding: 16px; }
+  .hero-visual .metric-row { gap: 8px; }
+  .hv-metric { padding: 10px; }
+  .hv-value { font-size: 18px; }
+  .hv-label { font-size: 9px; }
+  .section-title { font-size: 24px; }
+  .section-subtitle { font-size: 13px; margin-bottom: 32px; }
+  .caps { grid-template-columns: 1fr; }
+  .cap-card { padding: 20px; }
+  .solutions { grid-template-columns: 1fr; }
+  .sol-card { padding: 20px; }
+  .data-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .data-card { padding: 16px 12px; }
+  .data-value { font-size: 24px; }
+  .data-label { font-size: 10px; }
+  .eiaos-diagram { transform: scale(0.85); transform-origin: top center; }
+  .eiaos-tier { padding: 12px 16px; font-size: 11px; }
+  .eiaos-tier.top { font-size: 15px; }
+  .eiaos-tier.mid { grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 6px; }
+  .eiaos-tier.bottom { grid-template-columns: repeat(3, 1fr); padding: 8px; font-size: 8px; }
+  .eiaos-agent { padding: 8px; font-size: 10px; }
+  .agent-flex { gap: 6px; }
+  .agent-node { padding: 8px 14px; font-size: 11px; }
+  .insights { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+  .cta-section h2 { font-size: 24px; }
+  .cta-section { padding: 72px 16px; }
+  .insight-body { padding: 18px; }
+  .insight-title { font-size: 13px; }
+}
+
+/* Small phone */
+@media (max-width: 400px) {
+  .hero h1 { font-size: 22px; }
+  .section-title { font-size: 20px; }
+  .data-grid { grid-template-columns: 1fr; }
+  .eiaos-tier.mid { grid-template-columns: 1fr 1fr; }
+  .eiaos-tier.bottom { grid-template-columns: 1fr 1fr; }
+  nav { padding: 0 12px; }
+  section { padding: 40px 12px; }
+  .hero { padding-top: 88px; padding-bottom: 40px; }
+  .hero-eyebrow { font-size: 9px; letter-spacing: 1px; }
+  .btn { padding: 10px 20px; font-size: 13px; }
+  .cta-section h2 { font-size: 20px; }
+  .footer-top { grid-template-columns: 1fr; }
+}
 </style>
+<script src="agents.js"></script>
 </head>
 <body>
+<script>
+}
 
-<h1>PTM<span>.</span>AI Agent Platform</h1>
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('navMenu');
+  var btn = document.getElementById('menuToggle');
+  if (menu && menu.classList.contains('open') && !e.target.closest('#navMenu') && !e.target.closest('#menuToggle')) {
+    menu.classList.remove('open');
+    btn.classList.remove('open');
+  }
+});
+</script>
 
-<div class="agent-card">
-  <h3>投资筛选分析</h3>
-  <p>gemma4:31b — 评估储能项目投资价值</p>
-  <div class="inputs">
-    <input id="i-name" value="广东储能项目">
-    <input id="i-region" value="广东">
-    <input id="i-cap" type="number" value="100">
-    <input id="i-inv" type="number" value="50000000">
-    <input id="i-rev" type="number" value="8000000">
-    <input id="i-life" type="number" value="15">
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div>
+        <div style="line-height:1.2">PTM<span style="font-size:12px;color:var(--text-dim);font-weight:400;"> &middot; 彭田环保</span></div>
+        <div class="nav-brand-sub">PENGTIAN MOMENTUM</div>
+      </div>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu" onclick="document.getElementById('navMenu').classList.toggle('open');this.classList.toggle('open');">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navMenu">
+        <a href="#platform" onclick="closeMenu()">Platform</a>
+        <a href="#agents" onclick="closeMenu()">Agents</a>
+        <a href="#capabilities" onclick="closeMenu()">Capabilities</a>
+        <a href="#solutions" onclick="closeMenu()">Solutions</a>
+        <a href="#insights" onclick="closeMenu()">Insights</a>
+        <a href="#about" onclick="closeMenu()">About</a>
+      </div>
+    </div>
+  </nav>
+  <!-- END NAV -->
+
+<!-- HERO -->
+<section class="hero">
+  <div class="section-inner hero-grid">
+    <div>
+      <div class="hero-eyebrow">PENGTIAN MOMENTUM · 海南彭田环保科技有限公司</div>
+      <h1>Building the <span class="hero-hl">AI Operating System</span> for Renewable Energy Assets</h1>
+      <p>利用 AI、数字孪生、能源数据和智能 Agent，实现新能源资产从开发、投资、建设到运营的全生命周期智能化。</p>
+      <div class="hero-btns">
+        <a href="#platform" class="btn btn-primary">Explore Platform</a>
+        <a href="mailto:contact@titan-power.cn?subject=PTM%20Demo%20Request" class="btn btn-ghost">Book Demo</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="metric-row">
+        <div class="hv-metric">
+          <div class="hv-label">Active Agents</div>
+          <div class="hv-value teal" id="hv-agents">7</div>
+          <div class="hv-change">Investment · Policy · Market</div>
+        </div>
+        <div class="hv-metric">
+          <div class="hv-label">Investment Score</div>
+          <div class="hv-value teal" id="hv-score">81</div>
+          <div class="hv-change">Guangdong Storage Project</div>
+        </div>
+        <div class="hv-metric">
+          <div class="hv-label">Market Intelligence</div>
+          <div class="hv-value blue" id="hv-spread">1.2968</div>
+          <div class="hv-change">GD Peak-Valley Spread 元/kWh</div>
+        </div>
+        <div class="hv-metric">
+          <div class="hv-label">Policy Coverage</div>
+          <div class="hv-value">31</div>
+          <div class="hv-change">Provinces · Daily Scanning</div>
+        </div>
+      </div>
+      <div class="pulse-line"></div>
+      <div class="info-row">
+        <span>Policy Monitor: <span class="active">Active</span></span>
+        <span>Last Brief: <span id="hero-last-brief">2026-07-16</span></span>
+        <span>Next Run: <span>08:00 CST</span></span>
+      </div>
+    </div>
   </div>
-  <button onclick="runAgent('investment',{
-    project_name:document.getElementById('i-name').value,
-    region:document.getElementById('i-region').value,
-    capacity_mwh:parseFloat(document.getElementById('i-cap').value),
-    initial_investment:parseFloat(document.getElementById('i-inv').value),
-    annual_revenue:parseFloat(document.getElementById('i-rev').value),
-    project_life:parseFloat(document.getElementById('i-life').value)
-  },'result-investment')">运行投资分析</button>
-  <div class="result" id="result-investment"></div>
-</div>
+</section>
 
-<div class="agent-card">
-  <h3>政策分析</h3>
-  <p>qwen3.6:27b — 能源政策结构化简报</p>
-  <div class="inputs">
-    <input id="p-topic" value="2026年新型储能发展政策" style="grid-column:1/-1;">
+<!-- EIAOS PLATFORM -->
+<section class="eiaos-bg" id="platform">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-label">Platform</div>
+    <div class="section-title">EIAOS — Energy Investment AI Operating System</div>
+    <div class="section-subtitle" style="margin:0 auto 48px;">连接 AI、数字孪生、能源数据和智能 Agent，覆盖新能源资产全生命周期。</div>
+    <div class="eiaos-diagram">
+      <div class="eiaos-tier top">CEO Dashboard</div>
+      <div class="eiaos-connector"></div>
+      <div class="eiaos-tier mid">
+        <div class="eiaos-agent">Investment AI</div>
+        <div class="eiaos-agent">Trading AI</div>
+        <div class="eiaos-agent">Engineering AI</div>
+        <div class="eiaos-agent">Operation AI</div>
+      </div>
+      <div class="eiaos-connector"></div>
+      <div class="eiaos-tier bottom">
+        <div>Policy Data</div><div>Market Data</div><div>GIS Data</div>
+        <div>EMS/SCADA</div><div>Digital Twin</div><div>Knowledge Graph</div>
+      </div>
+    </div>
   </div>
-  <button onclick="runAgent('policy',{policy_topic:document.getElementById('p-topic').value},'result-policy')">运行政策分析</button>
-  <div class="result" id="result-policy"></div>
-</div>
+</section>
 
-<div class="agent-card">
-  <h3>电力市场周报</h3>
-  <p>gemma4:31b — 电力市场数据分析</p>
-  <div class="inputs">
-    <textarea id="m-data" placeholder="粘贴市场数据（或留空）"></textarea>
+<!-- CAPABILITIES -->
+<section id="capabilities">
+  <div class="section-inner">
+    <div class="section-label">Capabilities</div>
+    <div class="section-title">Four Pillars of Energy Intelligence</div>
+    <div class="section-subtitle">从发现投资机会到资产优化运营，AI 全面覆盖新能源资产价值链。</div>
+    <div class="caps">
+      <div class="cap-card">
+        <div class="cap-icon">🔍</div>
+        <div class="cap-title">AI Investment</div>
+        <div class="cap-desc">自动项目筛选、多维评分（政策/收益/电网/土地/风险）、IRR预测、敏感性分析。广东独立储能评分81/100，IRR 14%-18%。</div>
+        <div class="cap-tags"><span class="cap-tag">投资筛选</span><span class="cap-tag">IRR预测</span><span class="cap-tag">风险分析</span></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">🏗️</div>
+        <div class="cap-title">AI Engineering</div>
+        <div class="cap-desc">EPC优化、设备配置推荐、施工进度管理。GIS选址自动评估变电站距离、电网接入、负荷中心匹配。韶关选址82/100。</div>
+        <div class="cap-tags"><span class="cap-tag">GIS选址</span><span class="cap-tag">EPC优化</span><span class="cap-tag">并网分析</span></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">⚡</div>
+        <div class="cap-title">AI Operation</div>
+        <div class="cap-desc">数字孪生实时映射、智能运维预警、预测性维护、电池健康度监测。EMS 光伏站/储能站每周自动报告。</div>
+        <div class="cap-tags"><span class="cap-tag">数字孪生</span><span class="cap-tag">智能运维</span><span class="cap-tag">EMS</span></div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">📊</div>
+        <div class="cap-title">AI Trading</div>
+        <div class="cap-desc">电力现货价格预测、绿证交易策略、碳资产管理、辅助服务优化。广东峰谷价差1.2968元/kWh，两充两放IRR 14-22%。</div>
+        <div class="cap-tags"><span class="cap-tag">电力交易</span><span class="cap-tag">碳资产</span><span class="cap-tag">绿证</span></div>
+      </div>
+    </div>
   </div>
-  <button onclick="runAgent('market',{market_data:document.getElementById('m-data').value||'近期电力市场分析'},'result-market')">生成周报</button>
-  <div class="result" id="result-market"></div>
-</div>
+</section>
 
-<div class="agent-card">
-  <h3>财务审计</h3>
-  <p>qwen3-coder:30b — 财务报表审计意见</p>
-  <div class="inputs">
-    <textarea id="a-data">{"revenue":120000000,"cost":80000000,"profit":40000000}</textarea>
+<!-- VERIFIED DATA -->
+<section style="padding:60px 32px;">
+  <div class="section-inner">
+    <div class="section-label">Verified Intelligence</div>
+    <div class="section-title">Real Data. Real Decisions.</div>
+    <div class="section-subtitle">以下数据由 PTM Agent 体系自动采集并实时更新。</div>
+    <div class="data-grid" id="verifiedData"></div>
   </div>
-  <button onclick="runAgent('audit',{financial_data:JSON.parse(document.getElementById('a-data').value)},'result-audit')">运行审计</button>
-  <div class="result" id="result-audit"></div>
+</section>
+
+<!-- AGENTS -->
+<section class="agent-section" id="agents">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-label">AI Agent Network</div>
+    <div class="section-title">Intelligent Agents Powering Every Decision</div>
+    <div class="section-subtitle" style="margin:0 auto 48px;">点击 Agent 名称了解详情 · 7 个已激活 · 更多开发中</div>
+    <div class="agent-flex" id="agentNetwork"></div>
+  </div>
+</section>
+
+<!-- SOLUTIONS -->
+<section id="solutions">
+  <div class="section-inner">
+    <div class="section-label">Solutions</div>
+    <div class="section-title">Built for the Energy Transition</div>
+    <div class="section-subtitle">按客户类型量身定制，而非按产品分类。</div>
+    <div class="solutions" id="solutionsGrid"></div>
+  </div>
+</section>
+
+<!-- INSIGHTS -->
+<section style="background:var(--bg-elevated);border-top:1px solid rgba(0,210,170,0.08);border-bottom:1px solid rgba(0,210,170,0.08);" id="insights">
+  <div class="section-inner">
+    <div class="section-label">Energy AI Insights</div>
+    <div class="section-title">Research & Intelligence</div>
+    <div class="section-subtitle">AI自动生成行业研究，每周更新。点击阅读完整报告。</div>
+    <div class="insights" id="insightsGrid"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner" style="max-width:720px;text-align:center;">
+    <div class="section-label">About PTM</div>
+    <div class="section-title">Founded to build the next-generation AI Operating System for Renewable Energy Assets</div>
+    <p style="font-size:15px;color:var(--text-muted);line-height:1.8;margin-bottom:20px;">
+      海南彭田环保科技有限公司（PENGTIAN MOMENTUM，简称 PTM）是一家 AI 驱动的新能源资产开发与运营科技公司。
+    </p>
+    <p style="font-size:14px;color:var(--text-dim);line-height:1.8;">
+      我们不是传统的新能源项目开发商。我们正在构建 EIAOS — 全球首个能源投资 AI 操作系统，让 AI Agent 在政策监控、投资筛选、财务测算、GIS选址、电力交易和资产运营中自主协作。我们的核心竞争力不是拥有多少电站，而是拥有最强的 AI 决策和运营平台。
+    </p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="section-inner">
+    <h2>Ready to Build the Future of <span>Energy Intelligence</span>?</h2>
+    <p>探索 PTM 如何帮助您的能源资产实现 AI 驱动的智能化转型。</p>
+    <div class="cta-btns">
+      <a href="mailto:contact@titan-power.cn?subject=PTM%20Demo%20Request" class="btn btn-primary">Book a Demo</a>
+      <a href="#insights" class="btn btn-ghost">Explore Research →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">PTM <span style="font-size:12px;color:var(--text-dim);font-weight:400;">彭田环保</span></div>
+        <div class="footer-sub">PENGTIAN MOMENTUM — AI-Powered Renewable Asset Intelligence Company. 海南彭田环保科技有限公司.</div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Platform</div>
+        <a href="#platform">EIAOS</a>
+        <a href="#agents">AI Agents</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="dashboard.html" target="_blank">CEO Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Solutions</div>
+        <a href="#solutions">能源投资企业</a>
+        <a href="#solutions">工业园区</a>
+        <a href="#solutions">电网公司</a>
+        <a href="#solutions">地方政府</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Research</div>
+        <a href="#insights">政策分析</a>
+        <a href="#insights">投资简报</a>
+        <a href="#insights">市场周报</a>
+        <a href="#insights">白皮书下载</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 海南彭田环保科技有限公司 · PENGTIAN MOMENTUM. All rights reserved.</span>
+      <span>www.titan-power.cn · 琼ICP备XXXXXXXX号</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  EIAOS Data Engine — auto-loads from data.json
+//  All content updates automatically. No manual edits needed.
+// ══════════════════════════════════════════════════════
+
+var siteData = {
+  "market":{"peak_valley_spread":1.2968,"peak_valley_unit":"元/kWh","peak_valley_change":"↑12%","storage_cost":0.973,"storage_cost_unit":"元/Wh","carbon_price":78,"carbon_price_unit":"元/吨","capacity_price_gd":200,"vpp_operators":60,"competitive_price":0.488,"competitive_price_unit":"元/kWh","competitive_price_change":"↑96% YoY"},
+  "platform":{"agents_active":7,"agents_total":12,"last_policy_brief":"2026-07-16","next_policy_run":"weekday 08:00","next_ems_run":"Saturday 09:00"},
+  "investment_scores":[
+    {"region":"广东","type":"独立储能","capacity":"100MW/200MWh","score":81,"irr":"14%-18%","recommendation":"推荐开发","file":"investment-screening-gd.html"},
+    {"region":"广东·韶关","type":"独立储能","capacity":"100MW/200MWh","score":82,"irr":"14%-18%","recommendation":"推荐可研","file":"data/investment-screenings/shaoguan-storage-gis-2026-07-16.md"}
+  ],
+  "policies":[
+    {"date":"2026-07-07","title":"13省明确新型储能容量补偿机制，陕西165元、青海185元/KW/年","category":"储能","impact":"high","region":"陕西/青海"},
+    {"date":"2026-06-25","title":"十五五规划：储能年均增速17%，储能/风光装机比目标10.7%","category":"储能","impact":"high","region":"全国"},
+    {"date":"2026-02-08","title":"国办发〔2026〕4号：2030年前现货市场全面运行","category":"电力市场","impact":"high","region":"全国"},
+    {"date":"2026-05-14","title":"首单算随电动落地广东，VPP聚合数据中心参与电力现货","category":"VPP/微电网","impact":"high","region":"广东韶关"},
+    {"date":"2026-04-23","title":"双碳5+9考核体系：5项指标一票否决，与领导选拔挂钩","category":"绿证/碳交易","impact":"high","region":"全国"},
+    {"date":"2026-06-25","title":"十五五首次量化：2030年绿氢规模200万吨","category":"氢能","impact":"medium","region":"全国"}
+  ],
+  "alerts":[
+    {"level":"red","title":"系统运行费17省暴涨","detail":"储能充电成本上升，需更新财务模型"},
+    {"level":"red","title":"浙江峰谷价差缩窄21%","detail":"存量项目IRR面临下调压力"},
+    {"level":"amber","title":"广东拟调整分时电价","detail":"中午新增低谷时段"},
+    {"level":"amber","title":"碳市场即将扩围","detail":"石化、化工行业纳入，碳价看涨"},
+    {"level":"amber","title":"绿证需求将刚性化","detail":"当前仅碳价8%，存在10倍上涨空间"}
+  ]
+};
+
+// Try loading fresh data.json (updates whenever agents produce new data)
+try {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'data.json?' + Date.now(), true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      try { var d = JSON.parse(xhr.responseText); if (d && d.market) { siteData = d; } } catch(e) {}
+    }
+    renderAll();
+  };
+  xhr.onerror = function() { renderAll(); };
+  xhr.send();
+} catch(e) { renderAll(); }
+
+// Agent definitions with click actions
+var agents = [
+  {name:"🧠 AI Core", status:"active", click:null},
+  {name:"📡 Policy Monitor", status:"active", click:function(){window.open('policy-deep-dive.html','_blank')}},
+  {name:"💰 Investment Screening", status:"ondemand", click:function(){window.open('investment-screening-gd.html','_blank')}},
+  {name:"📊 Financial Model", status:"ondemand", click:function(){alert('Financial Model Agent\n\n按需调用。对我说：\n「计算 [项目参数] 的 IRR/NPV/LCOE」\n\n支持 5 种项目类型\n自动计算 + 敏感性分析')}},
+  {name:"🗺️ GIS Site Selection", status:"ondemand", click:function(){alert('GIS Site Selection Agent\n\n按需调用。对我说：\n「评估 [目标区域] 的储能选址条件」\n\n五维选址评分（土地/电网/负荷/资源/政策）\n已验证案例：韶关 82/100 · 推荐始兴县')}},
+  {name:"📈 Power Market", status:"ondemand", click:function(){window.open('power-market-weekly.html','_blank')}},
+  {name:"🔋 EMS Report", status:"active", click:function(){alert('EMS Weekly Report Agent\n\n定时运行：每周六 9:00 自动生成\n\n光伏站 + 储能站运行数据\n告警汇总 + 关键发现')}},
+  {name:"🧠 Knowledge Base", status:"active", click:function(){alert('Knowledge Base\n\n当前数据：13条政策 · 4个区域 · 9条电价\n\n对我说「搜索知识库 [关键词]」即可查询')}},
+  {name:"🔜 Risk Agent", status:"future", click:null},
+  {name:"🔜 Legal Agent", status:"future", click:null},
+  {name:"🔜 Carbon Agent", status:"future", click:null},
+  {name:"🔜 Hydrogen Agent", status:"future", click:null}
+];
+
+var solutions = [
+  {icon:"🏢", title:"能源投资企业", desc:"项目自动筛选与评分、IRR/NPV/DSCR 财务测算、政策环境扫描、投资组合优化。让AI帮你从1000个项目中找到最好的10个。", link:"#"},
+  {icon:"🏭", title:"工业园区", desc:"光储充一体化方案、VPP聚合服务、分时电价优化、需求侧响应、碳资产管理。广东已跑通「算随电动」商业模式。", link:"#"},
+  {icon:"⚡", title:"电网公司", desc:"电网消纳能力评估、变电站选址辅助、分布式资源聚合、调峰调频优化、新能源消纳提升。", link:"#"},
+  {icon:"🏗️", title:"新能源开发商", desc:"GIS选址自动评估、并网条件分析、EPC方案优化、项目尽调辅助。韶关82分选址报告为典型输出。", link:"#"},
+  {icon:"🏛️", title:"地方政府", desc:"区域能源规划、新能源资源普查、碳达峰路径模拟、双碳考核指标跟踪。「5+9」指标体系的数字化工具。", link:"#"},
+  {icon:"💻", title:"大型制造业", desc:"绿电直连方案、碳成本规避策略、储能套利优化、用电成本管理。锁定绿电就是锁定利润。", link:"#"}
+];
+
+var insights = [
+  {date:"2026-07-16 · 深度分析", title:"VPP · 氢能 · 碳交易：2026三大结构性政策变革", desc:"VPP国标落地+全国535个建成、氢能200万吨首次量化、双碳「5+9」考核与领导选拔挂钩——三重驱动力重塑能源投资逻辑。", tag:"政策分析", file:"data/policy-briefs/2026/07/2026-07-16-deep-dive.md"},
+  {date:"2026-07-16 · 投资简报", title:"广东独立储能投资筛选报告：81分，推荐开发", desc:"峰谷价差全国第一(1.1577-1.2968元)、储能成本历史低位(0.973元/Wh)、容量电价~200元/KW/年。两充两放IRR 14%-18%。", tag:"投资分析", file:"data/investment-screenings/guangdong-storage-2026-07-16.md"},
+  {date:"2026-07-16 · 电力市场周报", title:"广东电价同比暴涨96%创纪录 · 系统运行费17省翻倍", desc:"广东现货电价同比暴涨96%，珠三角峰谷价差升至1.2968元。但系统运行费暴涨警示储能财务模型需更新。", tag:"市场分析", file:"data/ems-reports/power-market-weekly-2026-07-16.md"}
+];
+
+function renderAll() {
+  renderAgents();
+  renderSolutions();
+  renderInsights();
+  renderVerifiedData();
+  renderHero();
+}
+
+function renderAgents() {
+  var el = document.getElementById('agentNetwork'); if (!el) return;
+  var h = '';
+  for (var i = 0; i < agents.length; i++) {
+    var a = agents[i];
+    var cls = a.status === 'future' ? 'agent-node' : (a.status === 'active' ? 'agent-node core' : 'agent-node');
+    var style = a.status === 'future' ? ' style="opacity:0.35;cursor:default"' : ' style="cursor:pointer"';
+    var onclick = a.click ? ' onclick="(' + a.click.toString() + ')()"' : '';
+    h += '<span class="' + cls + '"' + style + onclick + '>' + a.name + '</span>';
+  }
+  el.innerHTML = h;
+}
+
+function renderSolutions() {
+  var el = document.getElementById('solutionsGrid'); if (!el) return;
+  var h = '';
+  for (var i = 0; i < solutions.length; i++) {
+    var s = solutions[i];
+    h += '<div class="sol-card"><div class="sol-icon">' + s.icon + '</div><div class="sol-title">' + s.title + '</div><div class="sol-desc">' + s.desc + '</div></div>';
+  }
+  el.innerHTML = h;
+}
+
+function renderInsights() {
+  var el = document.getElementById('insightsGrid'); if (!el) return;
+  var h = '';
+  for (var i = 0; i < insights.length; i++) {
+    var v = insights[i];
+    h += '<a class="insight-card" style="text-decoration:none;color:inherit;" href="' + v.file + '" target="_blank"><div class="insight-body"><div class="insight-date">' + v.date + '</div><div class="insight-title">' + v.title + '</div><div class="insight-desc">' + v.desc + '</div><span class="insight-tag">' + v.tag + '</span></div></a>';
+  }
+  el.innerHTML = h;
+}
+
+function renderVerifiedData() {
+  var el = document.getElementById('verifiedData'); if (!el) return;
+  var m = siteData.market;
+  var h = '';
+  h += '<div class="data-card"><div class="data-value teal">' + m.peak_valley_spread + '</div><div class="data-label">广东峰谷价差</div><div class="data-sub">' + m.peak_valley_unit + ' · 珠三角五市 · 2026年7月</div></div>';
+  h += '<div class="data-card"><div class="data-value blue">' + m.storage_cost + '</div><div class="data-label">储能系统成本</div><div class="data-sub">' + m.storage_cost_unit + ' · 深南电中山项目 · 历史低位</div></div>';
+  h += '<div class="data-card"><div class="data-value teal">' + m.vpp_operators + '</div><div class="data-label">广东VPP运营商</div><div class="data-sub">家 · 首批发电类已参与现货交易</div></div>';
+  h += '<div class="data-card"><div class="data-value blue">13</div><div class="data-label">储能容量电价省份</div><div class="data-sub">省 · 陕西165 · 青海185 · 广东~200元/KW/年</div></div>';
+  el.innerHTML = h;
+}
+
+function renderHero() {
+  var el = document.getElementById('hv-agents'); if (el) el.textContent = siteData.platform.agents_active;
+  var el2 = document.getElementById('hv-score'); if (el2 && siteData.investment_scores.length > 0) el2.textContent = siteData.investment_scores[0].score;
+  var el3 = document.getElementById('hv-spread'); if (el3) el3.textContent = siteData.market.peak_valley_spread;
+}
+
+// Policy filter
+function filterPolicies(cat) {
+  var tabs = document.querySelectorAll('#policyTabs .tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  if (event && event.target) event.target.classList.add('active');
+  var items = document.querySelectorAll('#policyList .policy-item');
+  for (var i = 0; i < items.length; i++) {
+    items[i].style.display = (cat === 'all' || items[i].dataset.cat === cat) ? 'flex' : 'none';
+  }
+}
+
+// Knowledge search
+var KB = {
+  policies: [
+    {title:"十五五新型能源体系规划",cat:"储能",date:"2026-06-25",summary:"储能年均增速17%"},
+    {title:"国办发〔2026〕4号 统一电力市场",cat:"电力市场",date:"2026-02-08",summary:"2030年前现货全面运行"},
+    {title:"陕西165元/KW/年容量电价",cat:"储能",date:"2026-07-07",summary:"8月1日实施"},
+    {title:"青海185元/KW/年容量补偿",cat:"储能",date:"2026-07-07",summary:"容量供需系数0.92"},
+    {title:"广东储能管理办法",cat:"储能",date:"2026-04-22",summary:"首部储能全生命周期规章"},
+    {title:"VPP国标 GB/T 47241-2026",cat:"VPP/微电网",date:"2026-07",summary:"VPP建设迈入标准化"},
+    {title:"碳达峰碳中和5+9考核办法",cat:"绿证/碳交易",date:"2026-04-23",summary:"5项指标一票否决"},
+    {title:"2030年绿氢200万吨",cat:"氢能",date:"2026-06-25",summary:"十五五首次量化"},
+    {title:"广东VPP首单算随电动",cat:"VPP/微电网",date:"2026-05-14",summary:"数据中心参与现货"}
+  ],
+  prices: [
+    {region:"广东珠三角",metric:"最大峰谷价差",value:"1.1577 元/kWh"},
+    {region:"广东",metric:"储能系统成本",value:"0.973 元/Wh"},
+    {region:"广东",metric:"碳价",value:"78 元/吨"},
+    {region:"广东",metric:"容量电价",value:"200 元/KW/年"}
+  ],
+  regions: [
+    {province:"广东",vpp:60,loadGap:"5-10GW"},
+    {province:"陕西",capacityPrice:165},
+    {province:"青海",capacityPrice:185},
+    {province:"浙江",peakValley:"0.7867"}
+  ]
+};
+
+function handleSearch(e) { if (e.key === 'Enter') doSearch(); }
+function doSearch() {
+  var q = document.getElementById('searchInput').value.toLowerCase().trim();
+  var r = document.getElementById('searchResults');
+  if (!q) { r.innerHTML = '<div style="color:var(--text-dim);font-size:11px">输入关键词搜索</div>'; return; }
+  var html = '';
+  for (var i = 0; i < KB.policies.length; i++) {
+    var p = KB.policies[i];
+    if (p.title.indexOf(q) !== -1 || p.cat.indexOf(q) !== -1 || p.summary.indexOf(q) !== -1) {
+      html += '<div class="search-result"><strong>[政策]</strong> ' + p.title + '</div>';
+    }
+  }
+  for (var i = 0; i < KB.prices.length; i++) {
+    var p2 = KB.prices[i];
+    if (p2.region.indexOf(q) !== -1 || p2.metric.indexOf(q) !== -1) {
+      html += '<div class="search-result"><strong>[电价]</strong> ' + p2.region + ' ' + p2.metric + ': ' + p2.value + '</div>';
+    }
+  }
+  for (var i = 0; i < KB.regions.length; i++) {
+    var p3 = KB.regions[i];
+    if (p3.province.indexOf(q) !== -1) {
+      html += '<div class="search-result"><strong>[区域]</strong> ' + p3.province + '</div>';
+    }
+  }
+  r.innerHTML = html || '<div style="color:var(--text-dim);font-size:11px">无匹配结果</div>';
+}
+
+// Close menu on outside click
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('navMenu');
+  var btn = document.getElementById('menuToggle');
+  if (menu && menu.classList.contains('open') && !e.target.closest('#navMenu') && !e.target.closest('#menuToggle')) {
+    menu.classList.remove('open');
+    btn.classList.remove('open');
+  }
+});
+
+function closeMenu() {
+  var menu = document.getElementById('navMenu');
+  var btn = document.getElementById('menuToggle');
+  if (menu) menu.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+}
+
+// Update time badge
+setInterval(function() {
+  var now = new Date();
+  var badge = document.querySelector('.time-badge');
+  if (badge) {
+    badge.textContent = now.toLocaleString('zh-CN', {timeZone:'Asia/Shanghai',hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) + ' CST';
+  }
+}, 60000);
+
+// Initial render
+if (typeof renderAll === 'function') renderAll();
+</script>
+
+
+<!-- ===== AI Agent 分析区域 ===== -->
+<div style="max-width:1280px; margin:60px auto; padding:0 32px;">
+    
+    <h2 style="color:#00d2aa; font-size:28px; margin-bottom:40px; text-align:center;">AI Agent 智能分析</h2>
+    
+    <!-- 投资筛选 -->
+    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">投资筛选分析</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 评估储能项目投资价值</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="inv-name" value="广东储能项目" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="inv-region" value="广东" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="number" id="inv-capacity" value="100" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="number" id="inv-investment" value="50000000" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="number" id="inv-revenue" value="8000000" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="number" id="inv-life" value="15" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <button onclick="runInvestmentAgent({
+            project_name: document.getElementById('inv-name').value,
+            region: document.getElementById('inv-region').value,
+            capacity_mwh: parseFloat(document.getElementById('inv-capacity').value),
+            initial_investment: parseFloat(document.getElementById('inv-investment').value),
+            annual_revenue: parseFloat(document.getElementById('inv-revenue').value),
+            project_life: parseFloat(document.getElementById('inv-life').value)
+        })" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行投资分析</button>
+        <div id="result-investment" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8;"></div>
+    </div>
+    
+    <!-- 政策分析 -->
+    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">政策分析</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen3.6:27b — 能源政策结构化简报</p>
+        <input type="text" id="policy-topic" value="2026年新型储能发展政策" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; width:100%; margin-bottom:16px; box-sizing:border-box; font-size:14px;">
+        <button onclick="runPolicyAgent(document.getElementById('policy-topic').value)" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行政策分析</button>
+        <div id="result-policy" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8;"></div>
+    </div>
+
 </div>
 
 <script>
-async function runAgent(type, data, resultId) {
-  const btn = event.target, el = document.getElementById(resultId);
-  btn.disabled = true; btn.textContent = '运行中...'; el.style.display = 'none';
-  try {
-    const task = await window.agentRunner.runAgent(type, data);
-    window.agentRunner.pollTask(task.task_id,
-      () => {},
-      (res) => {
-        btn.disabled = false;
-        btn.textContent = btn.textContent.replace('运行中...','运行');
-        if (res.error) { el.innerHTML = '<span style="color:#f04460">错误: '+res.error+'</span>'; }
-        else { el.innerHTML = '<pre style="margin:0;white-space:pre-wrap;">'+(res.result?.result||res.result?.content||JSON.stringify(res,null,2))+'</pre>'; }
-        el.style.display = 'block';
-      }
-    );
-  } catch(e) { btn.disabled = false; btn.textContent = '运行'; el.innerHTML = '<span style="color:#f04460">错误: '+e.message+'</span>'; el.style.display = 'block'; }
+async function runInvestmentAgent(data) {
+    const btn = event.target;
+    const el = document.getElementById('result-investment');
+    btn.disabled = true; btn.textContent = '分析中...'; el.style.display = 'none';
+    try {
+        const task = await window.agentRunner.runAgent('investment', data);
+        window.agentRunner.pollTask(task.task_id,
+            () => {},
+            (res) => {
+                btn.disabled = false; btn.textContent = '运行投资分析';
+                if (res.error) { el.innerHTML = '<span style="color:#f04460">错误: '+res.error+'</span>'; }
+                else { el.innerHTML = '<pre style="margin:0;white-space:pre-wrap;">'+(res.result?.result||JSON.stringify(res,null,2))+'</pre>'; }
+                el.style.display = 'block';
+            }
+        );
+    } catch(e) { btn.disabled = false; btn.textContent = '运行投资分析'; el.innerHTML = '<span style="color:#f04460">错误: '+e.message+'</span>'; el.style.display = 'block'; }
+}
+
+async function runPolicyAgent(topic) {
+    const btn = event.target;
+    const el = document.getElementById('result-policy');
+    btn.disabled = true; btn.textContent = '分析中...'; el.style.display = 'none';
+    try {
+        const task = await window.agentRunner.runAgent('policy', {policy_topic: topic});
+        window.agentRunner.pollTask(task.task_id,
+            () => {},
+            (res) => {
+                btn.disabled = false; btn.textContent = '运行政策分析';
+                if (res.error) { el.innerHTML = '<span style="color:#f04460">错误: '+res.error+'</span>'; }
+                else { el.innerHTML = '<pre style="margin:0;white-space:pre-wrap;">'+(res.result?.result||JSON.stringify(res,null,2))+'</pre>'; }
+                el.style.display = 'block';
+            }
+        );
+    } catch(e) { btn.disabled = false; btn.textContent = '运行政策分析'; el.innerHTML = '<span style="color:#f04460">错误: '+e.message+'</span>'; el.style.display = 'block'; }
 }
 </script>
 
