@@ -23,7 +23,7 @@ class AgentRunner {
 
         if (!resp.ok) {
             const error = await resp.json();
-            throw new Error(error.detail || 'Agent 运行失败');
+            throw new Error(typeof error.detail === 'string' ? error.detail : JSON.stringify(error.detail));
         }
 
         const result = await resp.json();

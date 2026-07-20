@@ -1,0 +1,246 @@
+# ============================================================
+# EIAOS Agent 注册表
+# 能源投资运营平台 — 全部 Agent 的统一配置入口
+# 运行环境：Mac Studio 64GB + Ollama 本地模型
+#
+# status 说明：
+#   active  — 已激活，前端可调用
+#   pending — 待激活，API 返回 423 + 激活指引，前端显示"待激活"
+#
+# model_key 对应 app/services/ollama_client.py 中 MODELS：
+#   gemma4 = gemma4:31b      通用分析、报告生成
+#   qwen   = qwen3.6:27b     中文政策/法律文本理解
+#   coder  = qwen3-coder:30b 计算密集、代码与财务建模
+#   fast   = nemotron-3-nano:30b 高频轻量任务（监控扫描、分类）
+# ============================================================
+
+platform:
+  name: EIAOS
+  version: "1.1.0"
+  ollama_base_url: "http://localhost:11434"
+  # 输出目录：所有 Agent 生成的报告落盘位置（相对 backend/）
+  output_dir: "outputs"
+
+# ------------------------------------------------------------
+# 第一梯队：已激活（7 个）
+# ------------------------------------------------------------
+agents:
+
+  policy_monitor:
+    name: "PolicyMonitorAgent"
+    name_zh: "政策监测"
+    status: active
+    module: "app.agents.policy_agent"
+    class: "PolicyAnalysisAgent"
+    model_key: qwen            # 中文政策文本理解用 qwen
+    temperature: 0.3
+    description: "监测国家及地方能源政策，生成结构化政策简报与影响分析"
+    schedule:
+      enabled: true
+      cron: "0 8 * * *"        # 每天 08:00 自动扫描
+      task: "daily_policy_scan"
+    input_schema:
+      policy_text: "string, 可选 — 政策原文，直接分析"
+      policy_topic: "string, 可选 — 政策主题，如'江苏储能补贴'"
+      region: "string, 可选 — 限定省份"
+    output: "Markdown 政策简报（背景/核心内容/影响/执行要点/风险）"
+    downstream: [knowledge_base, investment_screening]
+
+  investment_screening:
+    name: "InvestmentScreeningAgent"
+    name_zh: "投资筛选"
+    status: active
+    module: "app.agents.investment_agent"
+    class: "InvestmentScreeningAgent"
+    model_key: gemma4
+    temperature: 0.2
+    description: "储能/新能源项目投资初筛：评分、财务门槛校验、风险提示"
+    schedule:
+      enabled: false           # 按需触发，不定时
+    input_schema:
+      project_name: "string, 必填"
+      region: "string, 必填"
+      capacity_mwh: "number, 必填"
+      initial_investment: "number, 必填（元）"
+      annual_revenue: "number, 可选（元）"
+      project_life: "number, 可选（年）"
+    output: "综合评分(0-100) + 投资建议 + 关键风险 + 是否进入深度评估"
+    thresholds:                # 硬性门槛，低于门槛直接给出否决提示
+      irr_min: 0.08
+      payback_max_years: 10
+    downstream: [financial_model, risk_agent]
+
+  financial_model:
+    name: "FinancialModelAgent"
+    name_zh: "财务建模"
+    status: active
+    module: "app.agents.financial_model_agent"
+    class: "FinancialModelAgent"
+    model_key: coder           # 计算密集，用 coder 模型
+    temperature: 0.1
+    description: "项目级财务模型：IRR/NPV/回收期计算、敏感性分析、融资结构测算"
+    schedule:
+      enabled: false
+    input_schema:
+      project_name: "string, 必填"
+      capacity_mwh: "number, 必填"
+      capex: "number, 必填（元/kWh 或总额，需注明）"
+      opex_annual: "number, 可选"
+      revenue_streams: "object, 可选 — {峰谷套利, 容量租赁, 辅助服务}"
+      debt_ratio: "number, 可选 — 默认 0.7"
+      loan_rate: "number, 可选 — 默认 0.045"
+      project_life: "number, 可选 — 默认 15"
+    output: "IRR/NPV/DSCR/回收期 + 敏感性矩阵（电价±20% × 利用率±20%）"
+    downstream: [investment_screening]
+
+  gis_site_selection:
+    name: "GISSiteSelectionAgent"
+    name_zh: "GIS 选址"
+    status: active
+    module: "app.agents.gis_agent"
+    class: "GISSiteSelectionAgent"
+    model_key: gemma4
+    temperature: 0.2
+    description: "基于风光资源、土地、电网接入、政策多因子加权的地块选址评分"
+    schedule:
+      enabled: false
+    input_schema:
+      candidate_sites: "array, 必填 — [{名称, 坐标, 面积, 土地性质, 距变电站km, 资源数据}]"
+      project_type: "string, 必填 — 光伏/风电/储能/风光储一体"
+      weights: "object, 可选 — 自定义因子权重"
+    output: "各地块加权评分排名 + 推荐结论 + 排除项说明"
+    downstream: [investment_screening]
+
+  power_market:
+    name: "PowerMarketAgent"
+    name_zh: "电力市场"
+    status: active
+    module: "app.agents.market_agent"
+    class: "PowerMarketAgent"
+    model_key: gemma4
+    temperature: 0.3
+    description: "电力现货/辅助服务市场分析：价格走势、峰谷价差、收益测算、周报"
+    schedule:
+      enabled: true
+      cron: "0 9 * * 1"        # 每周一 09:00 生成市场周报
+      task: "weekly_market_report"
+    input_schema:
+      market_data: "string/object, 必填 — 价格与交易数据"
+      province: "string, 可选 — 默认江苏"
+      report_type: "string, 可选 — weekly/monthly/spot_analysis"
+    output: "Markdown 市场周报（价格/电量/辅助服务/政策影响/预测）"
+    downstream: [ems_report, knowledge_base]
+
+  ems_report:
+    name: "EMSReportAgent"
+    name_zh: "EMS 运行报告"
+    status: active
+    module: "app.agents.ems_agent"
+    class: "EMSReportAgent"
+    model_key: fast            # 高频例行报告，用轻量模型
+    temperature: 0.2
+    description: "储能电站 EMS 运行日报/月报：充放电、效率、SOC、收益、告警统计"
+    schedule:
+      enabled: true
+      cron: "0 7 * * *"        # 每天 07:00 生成前一日运行日报
+      task: "daily_ems_report"
+    input_schema:
+      station_name: "string, 必填"
+      date: "string, 必填 — YYYY-MM-DD"
+      telemetry: "object, 必填 — {充电量, 放电量, SOC曲线, 告警列表, 收益}"
+    output: "Markdown 运行日报（KPI 表 + 异常分析 + 运维建议）"
+    downstream: [knowledge_base]
+
+  knowledge_base:
+    name: "KnowledgeBaseAgent"
+    name_zh: "知识库"
+    status: active
+    module: "app.agents.knowledge_agent"
+    class: "KnowledgeBaseAgent"
+    model_key: qwen
+    embedding_model: "nomic-embed-text"   # 需先 ollama pull nomic-embed-text
+    temperature: 0.2
+    description: "平台知识中枢：政策/报告/合同文档入库、向量检索、RAG 问答"
+    vector_store: "local_json" # 轻量本地实现；数据量大后切换 Milvus（docker-compose 已预留）
+    schedule:
+      enabled: false
+    input_schema:
+      action: "string, 必填 — ingest / query / list"
+      documents: "array, ingest 时必填 — [{title, content, source, date}]"
+      question: "string, query 时必填"
+      top_k: "number, 可选 — 默认 5"
+    output: "query: 带引用来源的回答；ingest: 入库文档数与分块数"
+    downstream: []
+
+# ------------------------------------------------------------
+# 第二梯队：待激活（4 个）
+# 激活方式：将 status 改为 active 并重启后端
+# ------------------------------------------------------------
+
+  risk_agent:
+    name: "RiskAgent"
+    name_zh: "风险分析"
+    status: pending
+    module: "app.agents.risk_agent"
+    class: "RiskAgent"
+    model_key: qwen
+    temperature: 0.2
+    description: "项目全周期风险矩阵：政策/市场/技术/建设/运营五维评分与缓释措施"
+    activation_requirements:
+      - "investment_screening 稳定运行 2 周以上"
+      - "knowledge_base 中已入库至少 20 份政策与合同文档"
+    input_schema:
+      project_info: "object, 必填"
+      risk_focus: "array, 可选 — 指定维度"
+    output: "风险矩阵（概率×影响）+ Top10 风险清单 + 缓释建议"
+
+  legal_agent:
+    name: "LegalAgent"
+    name_zh: "法务合规"
+    status: pending
+    module: "app.agents.legal_agent"
+    class: "LegalAgent"
+    model_key: qwen
+    temperature: 0.1
+    description: "合同条款审查、合规检查、能源法规问答（接 knowledge_base RAG）"
+    activation_requirements:
+      - "knowledge_base 向量检索准确率人工验收通过"
+      - "准备标准合同模板库（购售电/租赁/EPC）"
+    input_schema:
+      contract_text: "string, 必填"
+      review_type: "string, 可选 — 购售电/土地租赁/EPC/融资"
+    output: "条款级审查意见 + 风险条款标红 + 修改建议"
+
+  carbon_agent:
+    name: "CarbonAgent"
+    name_zh: "碳资产"
+    status: pending
+    module: "app.agents.carbon_agent"
+    class: "CarbonAgent"
+    model_key: gemma4
+    temperature: 0.2
+    description: "碳减排量核算、CCER/绿证收益测算、碳市场跟踪"
+    activation_requirements:
+      - "ems_report 提供稳定的充放电/发电量数据"
+      - "确认项目所在区域碳市场规则（全国/试点）"
+    input_schema:
+      generation_mwh: "number, 必填"
+      period: "string, 必填 — 核算周期"
+      grid_factor: "number, 可选 — 电网排放因子"
+    output: "减排量核算表 + 收益测算 + 申报流程清单"
+
+  hydrogen_agent:
+    name: "HydrogenAgent"
+    name_zh: "氢能"
+    status: pending
+    module: "app.agents.hydrogen_agent"
+    class: "HydrogenAgent"
+    model_key: gemma4
+    temperature: 0.3
+    description: "绿氢项目评估：电解槽选型、LCOH 测算、风光氢耦合方案"
+    activation_requirements:
+      - "financial_model 支持氢能项目的成本结构模板"
+      - "policy_monitor 已覆盖氢能专项政策源"
+    input_schema:
+      project_info: "object, 必填 — {电解槽MW, 年运行小时, 电价, 水源}"
+    output: "LCOH 测算 + 技术路线对比 + 与电网交互策略"
