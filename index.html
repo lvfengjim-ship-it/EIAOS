@@ -640,8 +640,125 @@ document.addEventListener('click', function(e) {
   <div class="section-inner" style="text-align:center;">
     <div class="section-label">AI Agent Network</div>
     <div class="section-title">Intelligent Agents Powering Every Decision</div>
-    <div class="section-subtitle" style="margin:0 auto 48px;">点击 Agent 名称了解详情 · 7 个已激活 · 更多开发中</div>
+    <div class="section-subtitle" style="margin:0 auto 48px;">点击 Agent 名称直达运行面板 · 7 个已激活 · 4 个待激活 · <span id="backend-status" style="color:#7f939e;">后端检测中...</span></div>
     <div class="agent-flex" id="agentNetwork"></div>
+    <div id="agent-panel" style="max-width:900px; margin:56px auto 0; text-align:left;">
+<!-- ① 政策监测 -->
+    <div id="card-policy_monitor" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">📜 政策监测 Policy Monitor</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen — 政策结构化简报 · 每日 08:00 自动扫描</p>
+        <textarea id="pm-text" rows="4" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">国办发〔2026〕4号：2030年前电力现货市场全面运行，推动储能参与现货与辅助服务市场……</textarea>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="pm-region" value="全国" placeholder="地区限定（可选）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <button data-agent="policy_monitor" onclick="runPolicyMonitor(document.getElementById('pm-text').value, document.getElementById('pm-region').value)" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行政策分析</button>
+        <div id="result-policy" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ② 投资筛选 -->
+    <div id="card-investment_screening" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">📊 投资筛选 Investment Screening</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 项目初筛评分 · IRR&gt;8% / 回收期&lt;10年 硬门槛</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="inv-name" value="广东储能项目" placeholder="项目名称" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="inv-region" value="广东" placeholder="项目地点" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="inv-capacity" value="100" placeholder="储能容量 MWh" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="inv-investment" value="50000000" placeholder="初始投资（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="inv-revenue" value="8000000" placeholder="预计年收入（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="inv-life" value="15" placeholder="项目周期（年）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <button data-agent="investment_screening" onclick="runInvestmentScreening({project_name:document.getElementById('inv-name').value, region:document.getElementById('inv-region').value, capacity_mwh:parseFloat(document.getElementById('inv-capacity').value), initial_investment:parseFloat(document.getElementById('inv-investment').value), annual_revenue:parseFloat(document.getElementById('inv-revenue').value), project_life:parseFloat(document.getElementById('inv-life').value)})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行投资初筛</button>
+        <div id="result-investment" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ③ 财务建模 -->
+    <div id="card-financial_model" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🧮 财务建模 Financial Model</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen3-coder:30b — IRR/NPV/DSCR 程序精确计算 + 敏感性矩阵</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="fm-capex" value="50000000" placeholder="总投资 capex（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-revenue" value="8000000" placeholder="首年收入（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-debt" value="0.7" placeholder="债务比例 0-1" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-life" value="15" placeholder="项目周期（年）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <button data-agent="financial_model" onclick="runFinancialModel({project_name:'测算项目', capex:parseFloat(document.getElementById('fm-capex').value), annual_revenue:parseFloat(document.getElementById('fm-revenue').value), debt_ratio:parseFloat(document.getElementById('fm-debt').value), project_life:parseInt(document.getElementById('fm-life').value)})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行财务测算</button>
+        <div id="result-financial" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ④ GIS 选址 -->
+    <div id="card-gis_site_selection" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🗺️ GIS 选址 Site Selection</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 资源/电网/土地/政策/经济 五因子加权评分</p>
+        <textarea id="gis-sites" rows="5" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">[{{"名称":"镇江大港地块","面积亩":120,"土地性质":"工业用地","距变电站km":3,"年辐照":"1350kWh/m²","消纳空间":"充足"}},{{"名称":"丹阳郊野地块","面积亩":200,"土地性质":"一般农用地","距变电站km":18,"年辐照":"1320kWh/m²","消纳空间":"紧张"}}]</textarea>
+        <button data-agent="gis_site_selection" onclick="runGISSelection(JSON.parse(document.getElementById('gis-sites').value), '储能')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行选址评估</button>
+        <div id="result-gis" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ⑤ 电力市场 -->
+    <div id="card-power_market" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">⚡ 电力市场 Power Market</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 现货/辅助服务分析 · 每周一 09:00 自动周报</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="mkt-province" value="江苏" placeholder="省份" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <textarea id="mkt-data" rows="4" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">本周日前均价：峰段 812 元/MWh，谷段 285 元/MWh，峰谷价差 527 元/MWh；调频里程均价 12.5 元/MW；新能源消纳率 96.2%。</textarea>
+        <button data-agent="power_market" onclick="runPowerMarket(document.getElementById('mkt-data').value, document.getElementById('mkt-province').value, 'weekly')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">生成市场周报</button>
+        <div id="result-market" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ⑥ EMS 运行报告 -->
+    <div id="card-ems_report" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🔋 EMS 运行报告</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">nemotron-3-nano — 运行 KPI + 异常分析 · 每日 07:00 自动日报</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="ems-station" value="镇江储能电站" placeholder="电站名称" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="ems-date" value="2026-07-19" placeholder="日期 YYYY-MM-DD" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <textarea id="ems-telemetry" rows="4" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">{{"charge_kwh": 20500, "discharge_kwh": 18450, "capacity_kwh": 100000, "revenue_yuan": 9680, "alarms": [{{"level":"提示","msg":"2号簇温差偏大"}},{{"level":"严重","msg":"PCS-3 通信中断 2 分钟"}}]}}</textarea>
+        <button data-agent="ems_report" onclick="runEMSReport(document.getElementById('ems-station').value, document.getElementById('ems-date').value, JSON.parse(document.getElementById('ems-telemetry').value))" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">生成运行日报</button>
+        <div id="result-ems" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ⑦ 知识库 -->
+    <div id="card-knowledge_base" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
+        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">📚 知识库 Knowledge Base</h3>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen + nomic-embed-text — 本地 RAG · 政策/报告自动归档</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+            <input type="text" id="kb-question" value="储能参与现货市场有哪些政策依据？" placeholder="输入问题" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+        </div>
+        <button data-agent="knowledge_base" onclick="runKnowledgeQuery(document.getElementById('kb-question').value)" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">知识库问答</button>
+        <div id="result-knowledge" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- 待激活模块 -->
+    <h3 style="color:#7f939e; font-size:18px; margin:48px 0 20px; text-align:center;">— 待激活模块 · 满足条件后在 agents.yaml 中开启 —</h3>
+    <div id="pending-grid" style="isplay:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px;" text-align:left;">
+        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
+            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🛡️ 风险分析 Risk Agent</h3>
+            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">五维风险矩阵 · 概率×影响评分</p>
+            <button data-agent="risk_agent" onclick="runRiskAgent({project_name:'示例项目'})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行风险分析</button>
+            <div id="result-risk" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+        </div>
+        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
+            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">⚖️ 法务合规 Legal Agent</h3>
+            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">合同条款审查 · 合规检查</p>
+            <button data-agent="legal_agent" onclick="runLegalAgent('（粘贴合同文本）')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行合同审查</button>
+            <div id="result-legal" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+        </div>
+        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
+            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🌱 碳资产 Carbon Agent</h3>
+            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">减排量核算 · CCER/绿证收益</p>
+            <button data-agent="carbon_agent" onclick="runCarbonAgent(12000, '2026上半年')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行碳核算</button>
+            <div id="result-carbon" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+        </div>
+        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
+            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">💧 氢能 Hydrogen Agent</h3>
+            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">LCOH 测算 · 风光氢耦合</p>
+            <button data-agent="hydrogen_agent" onclick="runHydrogenAgent({electrolyzer_mw:5, annual_hours:4000, electricity_price:0.25})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行氢能评估</button>
+            <div id="result-hydrogen" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
+        </div>
+    </div>
+    </div>
   </div>
 </section>
 
@@ -813,15 +930,24 @@ function renderAll() {
 
 function renderAgents() {
   var el = document.getElementById('agentNetwork'); if (!el) return;
+  var targets = ['agent-panel','card-policy_monitor','card-investment_screening','card-financial_model','card-gis_site_selection','card-power_market','card-ems_report','card-knowledge_base','pending-grid','pending-grid','pending-grid','pending-grid'];
   var h = '';
   for (var i = 0; i < agents.length; i++) {
     var a = agents[i];
     var cls = a.status === 'future' ? 'agent-node' : (a.status === 'active' ? 'agent-node core' : 'agent-node');
-    var style = a.status === 'future' ? ' style="opacity:0.35;cursor:default"' : ' style="cursor:pointer"';
-    var onclick = a.click ? ' onclick="(' + a.click.toString() + ')()"' : '';
-    h += '<span class="' + cls + '"' + style + onclick + '>' + a.name + '</span>';
+    var style = a.status === 'future' ? ' style="opacity:0.35;cursor:pointer"' : ' style="cursor:pointer"';
+    var t = targets[i] || 'agent-panel';
+    h += '<span class="' + cls + '"' + style + ' onclick="scrollToAgent(\'' + t + '\')">' + a.name + '</span>';
   }
   el.innerHTML = h;
+}
+
+function scrollToAgent(id) {
+  var t = document.getElementById(id); if (!t) return;
+  t.scrollIntoView({behavior:'smooth', block:'center'});
+  t.style.transition = 'box-shadow 0.3s';
+  t.style.boxShadow = '0 0 0 2px #00d2aa';
+  setTimeout(function(){ t.style.boxShadow = 'none'; }, 1600);
 }
 
 function renderSolutions() {
@@ -957,135 +1083,12 @@ if (typeof renderAll === 'function') renderAll();
 </script>
 
 
-<!-- ===== AI Agent 分析区域（11 模块 · 对接后端注册表） ===== -->
-<div style="max-width:1280px; margin:60px auto; padding:0 32px;" id="agent-panel">
-
-    <h2 style="color:#00d2aa; font-size:28px; margin-bottom:12px; text-align:center;">AI Agent 智能分析</h2>
-    <p style="color:#7f939e; font-size:14px; text-align:center; margin-bottom:40px;">7 个已激活模块 + 4 个待激活模块 · 本地 Ollama 驱动 · <span id="backend-status" style="color:#7f939e;">后端连接检测中...</span></p>
-
-    <!-- ① 政策监测 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">📜 政策监测 Policy Monitor</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen — 政策结构化简报 · 每日 08:00 自动扫描</p>
-        <textarea id="pm-text" rows="4" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">国办发〔2026〕4号：2030年前电力现货市场全面运行，推动储能参与现货与辅助服务市场……</textarea>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <input type="text" id="pm-region" value="全国" placeholder="地区限定（可选）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-        </div>
-        <button data-agent="policy_monitor" onclick="runPolicyMonitor(document.getElementById('pm-text').value, document.getElementById('pm-region').value)" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行政策分析</button>
-        <div id="result-policy" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- ② 投资筛选 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">📊 投资筛选 Investment Screening</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 项目初筛评分 · IRR&gt;8% / 回收期&lt;10年 硬门槛</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <input type="text" id="inv-name" value="广东储能项目" placeholder="项目名称" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="inv-region" value="广东" placeholder="项目地点" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="inv-capacity" value="100" placeholder="储能容量 MWh" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="inv-investment" value="50000000" placeholder="初始投资（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="inv-revenue" value="8000000" placeholder="预计年收入（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="inv-life" value="15" placeholder="项目周期（年）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-        </div>
-        <button data-agent="investment_screening" onclick="runInvestmentScreening({project_name:document.getElementById('inv-name').value, region:document.getElementById('inv-region').value, capacity_mwh:parseFloat(document.getElementById('inv-capacity').value), initial_investment:parseFloat(document.getElementById('inv-investment').value), annual_revenue:parseFloat(document.getElementById('inv-revenue').value), project_life:parseFloat(document.getElementById('inv-life').value)})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行投资初筛</button>
-        <div id="result-investment" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- ③ 财务建模 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🧮 财务建模 Financial Model</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen3-coder:30b — IRR/NPV/DSCR 程序精确计算 + 敏感性矩阵</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <input type="text" id="fm-capex" value="50000000" placeholder="总投资 capex（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="fm-revenue" value="8000000" placeholder="首年收入（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="fm-debt" value="0.7" placeholder="债务比例 0-1" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="fm-life" value="15" placeholder="项目周期（年）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-        </div>
-        <button data-agent="financial_model" onclick="runFinancialModel({project_name:'测算项目', capex:parseFloat(document.getElementById('fm-capex').value), annual_revenue:parseFloat(document.getElementById('fm-revenue').value), debt_ratio:parseFloat(document.getElementById('fm-debt').value), project_life:parseInt(document.getElementById('fm-life').value)})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行财务测算</button>
-        <div id="result-financial" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- ④ GIS 选址 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🗺️ GIS 选址 Site Selection</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 资源/电网/土地/政策/经济 五因子加权评分</p>
-        <textarea id="gis-sites" rows="5" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">[{{"名称":"镇江大港地块","面积亩":120,"土地性质":"工业用地","距变电站km":3,"年辐照":"1350kWh/m²","消纳空间":"充足"}},{{"名称":"丹阳郊野地块","面积亩":200,"土地性质":"一般农用地","距变电站km":18,"年辐照":"1320kWh/m²","消纳空间":"紧张"}}]</textarea>
-        <button data-agent="gis_site_selection" onclick="runGISSelection(JSON.parse(document.getElementById('gis-sites').value), '储能')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行选址评估</button>
-        <div id="result-gis" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- ⑤ 电力市场 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">⚡ 电力市场 Power Market</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">gemma4:31b — 现货/辅助服务分析 · 每周一 09:00 自动周报</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <input type="text" id="mkt-province" value="江苏" placeholder="省份" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-        </div>
-        <textarea id="mkt-data" rows="4" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">本周日前均价：峰段 812 元/MWh，谷段 285 元/MWh，峰谷价差 527 元/MWh；调频里程均价 12.5 元/MW；新能源消纳率 96.2%。</textarea>
-        <button data-agent="power_market" onclick="runPowerMarket(document.getElementById('mkt-data').value, document.getElementById('mkt-province').value, 'weekly')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">生成市场周报</button>
-        <div id="result-market" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- ⑥ EMS 运行报告 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🔋 EMS 运行报告</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">nemotron-3-nano — 运行 KPI + 异常分析 · 每日 07:00 自动日报</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <input type="text" id="ems-station" value="镇江储能电站" placeholder="电站名称" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="ems-date" value="2026-07-19" placeholder="日期 YYYY-MM-DD" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-        </div>
-        <textarea id="ems-telemetry" rows="4" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:16px; font-family:monospace;">{{"charge_kwh": 20500, "discharge_kwh": 18450, "capacity_kwh": 100000, "revenue_yuan": 9680, "alarms": [{{"level":"提示","msg":"2号簇温差偏大"}},{{"level":"严重","msg":"PCS-3 通信中断 2 分钟"}}]}}</textarea>
-        <button data-agent="ems_report" onclick="runEMSReport(document.getElementById('ems-station').value, document.getElementById('ems-date').value, JSON.parse(document.getElementById('ems-telemetry').value))" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">生成运行日报</button>
-        <div id="result-ems" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- ⑦ 知识库 -->
-    <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px;">
-        <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">📚 知识库 Knowledge Base</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen + nomic-embed-text — 本地 RAG · 政策/报告自动归档</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <input type="text" id="kb-question" value="储能参与现货市场有哪些政策依据？" placeholder="输入问题" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-        </div>
-        <button data-agent="knowledge_base" onclick="runKnowledgeQuery(document.getElementById('kb-question').value)" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">知识库问答</button>
-        <div id="result-knowledge" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-    </div>
-
-    <!-- 待激活模块 -->
-    <h3 style="color:#7f939e; font-size:18px; margin:48px 0 20px; text-align:center;">— 待激活模块（满足条件后在 agents.yaml 中开启）—</h3>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px;">
-        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
-            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🛡️ 风险分析 Risk Agent</h3>
-            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">五维风险矩阵 · 概率×影响评分</p>
-            <button data-agent="risk_agent" onclick="runRiskAgent({project_name:'示例项目'})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行风险分析</button>
-            <div id="result-risk" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-        </div>
-        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
-            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">⚖️ 法务合规 Legal Agent</h3>
-            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">合同条款审查 · 合规检查</p>
-            <button data-agent="legal_agent" onclick="runLegalAgent('（粘贴合同文本）')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行合同审查</button>
-            <div id="result-legal" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-        </div>
-        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
-            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🌱 碳资产 Carbon Agent</h3>
-            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">减排量核算 · CCER/绿证收益</p>
-            <button data-agent="carbon_agent" onclick="runCarbonAgent(12000, '2026上半年')" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行碳核算</button>
-            <div id="result-carbon" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-        </div>
-        <div style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; opacity:0.75; margin-bottom:0;">
-            <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">💧 氢能 Hydrogen Agent</h3>
-            <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">LCOH 测算 · 风光氢耦合</p>
-            <button data-agent="hydrogen_agent" onclick="runHydrogenAgent({electrolyzer_mw:5, annual_hours:4000, electricity_price:0.25})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行氢能评估</button>
-            <div id="result-hydrogen" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
-        </div>
-    </div>
-
-</div>
-
 <script src="frontend/js/agents_ext.js"></script>
 <script>
 // 后端连接状态提示
 (async function() {
     const el = document.getElementById('backend-status');
+    if (!el) return;
     try {
         const r = await fetch('http://localhost:8000/health');
         if (r.ok) { el.textContent = '后端已连接 ✓'; el.style.color = '#00d2aa'; }
