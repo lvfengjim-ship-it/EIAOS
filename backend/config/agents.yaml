@@ -78,19 +78,25 @@ agents:
     class: "FinancialModelAgent"
     model_key: coder           # 计算密集，用 coder 模型
     temperature: 0.1
-    description: "项目级财务模型：IRR/NPV/回收期计算、敏感性分析、融资结构测算"
+    description: "财务建模 v2：逐年衰减曲线、四方分润、融资杠杆 Equity IRR、双敏感性矩阵"
     schedule:
       enabled: false
     input_schema:
       project_name: "string, 必填"
-      capacity_mwh: "number, 必填"
-      capex: "number, 必填（元/kWh 或总额，需注明）"
-      opex_annual: "number, 可选"
-      revenue_streams: "object, 可选 — {峰谷套利, 容量租赁, 辅助服务}"
-      debt_ratio: "number, 可选 — 默认 0.7"
+      capacity_mwh: "number, 可选"
+      capex: "number, 必填（总投资额，元）"
+      annual_revenue: "number, 必填（首年总收入，元）"
+      opex_annual: "number, 可选 — 默认收入 2%"
+      insurance_rate: "number, 可选 — 默认 0.005（建置费 0.5%/年）"
+      project_life: "number, 可选 — 默认 20 年"
+      shares: "object, 可选 — 四方分润 {owner:0.15, operator:0.15, spv:0.65, platform:0.05}，和须为 1"
+      first_year_retention: "number, 可选 — 电池次年保持率，默认 0.981"
+      degradation_rate: "number, 可选 — 年衰减率，默认 0.018"
+      retention_schedule: "array, 可选 — 自定义逐年保持率，覆盖上述两参数"
+      debt_ratio: "number, 可选 — 融资比例，默认 0（无杠杆）"
       loan_rate: "number, 可选 — 默认 0.045"
-      project_life: "number, 可选 — 默认 15"
-    output: "IRR/NPV/DSCR/回收期 + 敏感性矩阵（电价±20% × 利用率±20%）"
+      loan_years: "number, 可选 — 默认 10"
+    output: "项目IRR/NPV + SPV无杠杆IRR/回收期 + 杠杆后Equity IRR/DSCR + 四方分润表 + 逐年现金流 + 双敏感性矩阵（成本×分润、收入×利用率）"
     downstream: [investment_screening]
 
   gis_site_selection:

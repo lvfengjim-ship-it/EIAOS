@@ -674,14 +674,18 @@ document.addEventListener('click', function(e) {
     <!-- ③ 财务建模 -->
     <div id="card-financial_model" style="background:#101b21; border:1px solid #16242e; border-radius:8px; padding:32px; margin-bottom:24px; text-align:left;">
         <h3 style="color:#e4ecef; font-size:20px; margin-bottom:8px;">🧮 财务建模 Financial Model</h3>
-        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen3-coder:30b — IRR/NPV/DSCR 程序精确计算 + 敏感性矩阵</p>
+        <p style="color:#7f939e; font-size:14px; margin-bottom:20px;">qwen3-coder:30b — 衰减曲线 + 四方分润 + 杠杆 Equity IRR + 双敏感性矩阵</p>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
             <input type="text" id="fm-capex" value="50000000" placeholder="总投资 capex（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="fm-revenue" value="8000000" placeholder="首年收入（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="fm-debt" value="0.7" placeholder="债务比例 0-1" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
-            <input type="text" id="fm-life" value="15" placeholder="项目周期（年）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-revenue" value="8000000" placeholder="首年总收入（元）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-spv" value="0.65" placeholder="SPV 分润比例 0-1" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-debt" value="0.7" placeholder="融资比例 0-1（0=无杠杆）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-rate" value="0.045" placeholder="贷款利率" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-loanyears" value="10" placeholder="贷款年限" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-life" value="20" placeholder="项目周期（年）" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
+            <input type="text" id="fm-deg" value="0.018" placeholder="电池年衰减率" style="background:#0c1519; border:1px solid #16242e; border-radius:6px; padding:10px 14px; color:#e4ecef; font-size:14px;">
         </div>
-        <button data-agent="financial_model" onclick="runFinancialModel({project_name:'测算项目', capex:parseFloat(document.getElementById('fm-capex').value), annual_revenue:parseFloat(document.getElementById('fm-revenue').value), debt_ratio:parseFloat(document.getElementById('fm-debt').value), project_life:parseInt(document.getElementById('fm-life').value)})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行财务测算</button>
+        <button data-agent="financial_model" onclick="runFinancialModel({project_name:'测算项目', capex:parseFloat(document.getElementById('fm-capex').value), annual_revenue:parseFloat(document.getElementById('fm-revenue').value), shares:{owner:(1-parseFloat(document.getElementById('fm-spv').value)-0.05)/2, operator:(1-parseFloat(document.getElementById('fm-spv').value)-0.05)/2, spv:parseFloat(document.getElementById('fm-spv').value), platform:0.05}, debt_ratio:parseFloat(document.getElementById('fm-debt').value), loan_rate:parseFloat(document.getElementById('fm-rate').value), loan_years:parseInt(document.getElementById('fm-loanyears').value), project_life:parseInt(document.getElementById('fm-life').value), degradation_rate:parseFloat(document.getElementById('fm-deg').value)})" style="background:linear-gradient(135deg,#00d2aa,#0096e0); color:white; border:none; padding:12px 28px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;">运行财务测算</button>
         <div id="result-financial" style="display:none; margin-top:20px; padding:20px; background:#0c1519; border-left:3px solid #00d2aa; border-radius:4px; white-space:pre-wrap; color:#e4ecef; font-size:14px; line-height:1.8; max-height:480px; overflow-y:auto;"></div>
     </div>
 
